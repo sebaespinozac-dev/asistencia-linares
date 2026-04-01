@@ -3,558 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Asistencia — Delegación Provincial de Linares</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --azul: #1a3a5c;
-      --azul-medio: #1a5276;
-      --azul-claro: #2e86c1;
-      --rojo: #c0392b;
-      --verde: #1e8449;
-      --gris-fondo: #f4f6f8;
-      --gris-borde: #d5d8dc;
-      --texto: #1c2833;
-      --texto-suave: #566573;
-      --blanco: #ffffff;
-      --sombra: 0 2px 12px rgba(0,0,0,0.10);
-    }
-
-    body {
-      font-family: 'Source Sans 3', sans-serif;
-      background: var(--gris-fondo);
-      color: var(--texto);
-      min-height: 100vh;
-    }
-
-    /* ===== LOGIN ===== */
-    #login-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #1a3a5c 0%, #1a5276 60%, #2e86c1 100%);
-      padding: 20px;
-    }
-
-    .login-card {
-      background: white;
-      border-radius: 12px;
-      padding: 48px 40px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    }
-
-    .login-escudo {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .login-escudo svg {
-      width: 64px;
-      height: 64px;
-    }
-
-    .login-titulo {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.5rem;
-      color: var(--azul);
-      text-align: center;
-      line-height: 1.3;
-      margin-bottom: 6px;
-    }
-
-    .login-subtitulo {
-      text-align: center;
-      color: var(--texto-suave);
-      font-size: 0.88rem;
-      margin-bottom: 32px;
-    }
-
-    .campo {
-      margin-bottom: 18px;
-    }
-
-    .campo label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--texto-suave);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 6px;
-    }
-
-    .campo input {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1.5px solid var(--gris-borde);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      transition: border-color 0.2s;
-      background: #fafafa;
-    }
-
-    .campo input:focus {
-      outline: none;
-      border-color: var(--azul-claro);
-      background: white;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 13px;
-      background: var(--azul);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      margin-top: 8px;
-    }
-
-    .btn-primary:hover { background: var(--azul-medio); }
-    .btn-primary:active { transform: scale(0.98); }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-    .error-msg {
-      background: #fdf2f2;
-      border: 1px solid #e74c3c;
-      color: #c0392b;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      margin-top: 14px;
-      display: none;
-    }
-
-    /* ===== LAYOUT APP ===== */
-    #app-screen { display: none; min-height: 100vh; }
-
-    .topbar {
-      background: var(--azul);
-      color: white;
-      padding: 0 24px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: var(--sombra);
-    }
-
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .topbar-titulo {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.1rem;
-      letter-spacing: 0.02em;
-    }
-
-    .topbar-subtitulo {
-      font-size: 0.75rem;
-      opacity: 0.7;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .usuario-badge {
-      font-size: 0.85rem;
-      opacity: 0.9;
-    }
-
-    .btn-logout {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: white;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 0.82rem;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.2s;
-    }
-    .btn-logout:hover { background: rgba(255,255,255,0.22); }
-
-    .nav-tabs {
-      background: var(--azul-medio);
-      display: flex;
-      padding: 0 24px;
-      gap: 4px;
-    }
-
-    .nav-tab {
-      padding: 12px 20px;
-      color: rgba(255,255,255,0.7);
-      cursor: pointer;
-      font-size: 0.88rem;
-      font-weight: 600;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .nav-tab:hover { color: white; }
-    .nav-tab.active { color: white; border-bottom-color: #5dade2; }
-
-    .content-area {
-      padding: 28px 24px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    /* ===== PANEL EMPLEADO ===== */
-    .marcaje-card {
-      background: white;
-      border-radius: 12px;
-      padding: 36px;
-      box-shadow: var(--sombra);
-      max-width: 540px;
-      margin: 0 auto;
-    }
-
-    .marcaje-titulo {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.4rem;
-      color: var(--azul);
-      margin-bottom: 6px;
-    }
-
-    .fecha-actual {
-      color: var(--texto-suave);
-      font-size: 0.9rem;
-      margin-bottom: 28px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--gris-borde);
-    }
-
-    .estado-jornada {
-      background: #eaf4ff;
-      border: 1px solid #aed6f1;
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .estado-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #95a5a6;
-      flex-shrink: 0;
-    }
-    .estado-dot.activo { background: var(--verde); animation: pulse 1.5s infinite; }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    .estado-texto { font-size: 0.9rem; color: var(--texto); }
-    .estado-hora { font-weight: 700; }
-
-    .botones-marcaje {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-
-    .btn-entrada {
-      padding: 18px;
-      background: var(--verde);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-salida {
-      padding: 18px;
-      background: var(--rojo);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-entrada:hover { background: #1a6e3a; }
-    .btn-salida:hover { background: #a93226; }
-    .btn-entrada:disabled, .btn-salida:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .geo-info {
-      font-size: 0.78rem;
-      color: var(--texto-suave);
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .tabla-marcajes {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-    }
-
-    .tabla-marcajes th {
-      background: #f0f3f4;
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 600;
-      color: var(--texto-suave);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .tabla-marcajes td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--gris-borde);
-    }
-
-    .badge-entrada { background: #d5f5e3; color: #1e8449; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; }
-    .badge-salida { background: #fdebd0; color: #d35400; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; }
-
-    /* ===== PANEL ADMIN ===== */
-    .admin-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
-    .kpi-card {
-      background: white;
-      border-radius: 10px;
-      padding: 20px 24px;
-      box-shadow: var(--sombra);
-      border-left: 4px solid var(--azul-claro);
-    }
-
-    .kpi-label { font-size: 0.78rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-    .kpi-valor { font-size: 2rem; font-weight: 700; color: var(--azul); }
-
-    .panel-card {
-      background: white;
-      border-radius: 10px;
-      padding: 24px;
-      box-shadow: var(--sombra);
-      margin-bottom: 20px;
-    }
-
-    .panel-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--azul);
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--gris-borde);
-    }
-
-    .filtros {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: flex-end;
-    }
-
-    .filtro-campo {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .filtro-campo label { font-size: 0.78rem; color: var(--texto-suave); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-
-    .filtro-campo input, .filtro-campo select {
-      padding: 8px 12px;
-      border: 1.5px solid var(--gris-borde);
-      border-radius: 6px;
-      font-family: inherit;
-      font-size: 0.88rem;
-      background: #fafafa;
-    }
-
-    .btn-filtrar {
-      padding: 8px 18px;
-      background: var(--azul);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 600;
-    }
-
-    .btn-excel {
-      padding: 8px 18px;
-      background: #1e8449;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .btn-pdf {
-      padding: 8px 18px;
-      background: #c0392b;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .tabla-admin {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-    }
-
-    .tabla-admin th {
-      background: var(--azul);
-      color: white;
-      padding: 10px 14px;
-      text-align: left;
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .tabla-admin td {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--gris-borde);
-    }
-
-    .tabla-admin tr:hover td { background: #f8fafc; }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
-    }
-
-    .modal-overlay.active { display: flex; }
-
-    .modal-card {
-      background: white;
-      border-radius: 12px;
-      padding: 32px;
-      width: 100%;
-      max-width: 440px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-
-    .modal-card h3 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.3rem;
-      color: var(--azul);
-      margin-bottom: 20px;
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-      justify-content: flex-end;
-    }
-
-    .btn-cancel {
-      padding: 9px 20px;
-      background: var(--gris-fondo);
-      border: 1px solid var(--gris-borde);
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.9rem;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #1e8449;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      transition: transform 0.3s ease;
-      z-index: 9999;
-    }
-
-    .toast.show { transform: translateX(-50%) translateY(0); }
-    .toast.error { background: var(--rojo); }
-
-    @media (max-width: 600px) {
-      .botones-marcaje { grid-template-columns: 1fr; }
-      .filtros { flex-direction: column; }
-      .topbar-titulo { font-size: 0.9rem; }
-      .content-area { padding: 16px; }
-      .marcaje-card { padding: 24px 18px; }
-    }
-  </style>
+  <title>Control de Asistencia — Delegación Provincial de Linares</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-escudo">
-      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="64" height="64" rx="32" fill="#1a3a5c"/>
-        <path d="M32 12L44 20V32C44 40 38 46.5 32 49C26 46.5 20 40 20 32V20L32 12Z" fill="#2e86c1" stroke="white" stroke-width="1.5"/>
-        <path d="M27 32L30.5 35.5L37 28" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+    <div class="login-header">
+      <img src="logo.png" alt="Logo Delegación Presidencial" class="login-logo" />
+      <h1 class="login-titulo">Control de Asistencia</h1>
+      <p class="login-subtitulo">Delegación Presidencial Provincial de Linares</p>
     </div>
-    <h1 class="login-titulo">Control de Asistencia</h1>
-    <p class="login-subtitulo">Delegación Presidencial Provincial de Linares</p>
 
     <div class="campo">
       <label>Correo electrónico</label>
@@ -573,34 +34,36 @@
 <div id="app-screen">
   <div class="topbar">
     <div class="topbar-left">
-      <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
-        <rect width="64" height="64" rx="32" fill="rgba(255,255,255,0.15)"/>
-        <path d="M32 12L44 20V32C44 40 38 46.5 32 49C26 46.5 20 40 20 32V20L32 12Z" fill="rgba(255,255,255,0.3)" stroke="white" stroke-width="1.5"/>
-      </svg>
-      <div>
-        <div class="topbar-titulo">Sistema de Asistencia</div>
-        <div class="topbar-subtitulo">Delegación Provincial de Linares</div>
+      <img src="logo.png" alt="Logo" class="topbar-logo" />
+      <div class="topbar-titulo-grupo">
+        <div class="topbar-titulo">Control de Asistencia</div>
+        <div class="topbar-subtitulo">Delegación Presidencial Provincial de Linares</div>
       </div>
     </div>
     <div class="topbar-right">
-      <span class="usuario-badge" id="usuario-nombre"></span>
+      <div class="usuario-info">
+        <div class="usuario-initials" id="usuario-avatar">👤</div>
+        <span class="usuario-badge" id="usuario-nombre"></span>
+      </div>
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
     </div>
   </div>
 
-  <div class="nav-tabs" id="nav-tabs">
-    <div class="nav-tab active" data-tab="marcaje">Mi Asistencia</div>
-    <div class="nav-tab" data-tab="historial">Mi Historial</div>
-    <div class="nav-tab admin-only" data-tab="admin-registros" style="display:none">Registros</div>
-    <div class="nav-tab admin-only" data-tab="admin-usuarios" style="display:none">Usuarios</div>
+  <div class="nav-container">
+    <div class="nav-tabs" id="nav-tabs">
+      <div class="nav-tab active" data-tab="marcaje">Mi Asistencia</div>
+      <div class="nav-tab" data-tab="historial">Mi Historial</div>
+      <div class="nav-tab admin-only" data-tab="admin-registros" style="display:none">Registros</div>
+      <div class="nav-tab admin-only" data-tab="admin-usuarios" style="display:none">Usuarios</div>
+    </div>
   </div>
 
   <div class="content-area">
 
     <!-- TAB: MARCAJE -->
     <div id="tab-marcaje">
-      <div class="marcaje-card">
-        <h2 class="marcaje-titulo">Registro de Jornada</h2>
+      <div class="panel-card marcaje-card">
+        <h2>Registro de Jornada</h2>
         <div class="fecha-actual" id="fecha-actual"></div>
 
         <div class="estado-jornada" id="estado-jornada">
@@ -611,23 +74,31 @@
         </div>
 
         <div class="botones-marcaje">
-          <button class="btn-entrada" id="btn-entrada">⬆ Marcar Entrada</button>
-          <button class="btn-salida" id="btn-salida">⬇ Marcar Salida</button>
+          <button class="btn-entrada" id="btn-entrada">
+            <span>⬆</span>
+            Marcar Entrada
+          </button>
+          <button class="btn-salida" id="btn-salida">
+            <span>⬇</span>
+            Marcar Salida
+          </button>
         </div>
 
         <div class="geo-info" id="geo-info">Obteniendo ubicación GPS...</div>
 
-        <h4 style="font-size:0.85rem;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Marcajes de hoy</h4>
-        <table class="tabla-marcajes">
-          <thead>
-            <tr>
-              <th>Tipo</th>
-              <th>Hora</th>
-              <th>IP</th>
-            </tr>
-          </thead>
-          <tbody id="marcajes-hoy"></tbody>
-        </table>
+        <h4 style="font-size:0.875rem; color:var(--texto-suave); text-transform:uppercase; letter-spacing:.05em; margin-bottom:16px; text-align:left;">Marcajes de hoy</h4>
+        <div class="table-responsive">
+          <table class="tabla-marcajes">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Hora</th>
+                <th>IP</th>
+              </tr>
+            </thead>
+            <tbody id="marcajes-hoy"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -635,49 +106,57 @@
     <div id="tab-historial" style="display:none">
       <div class="panel-card">
         <h3>Mi Historial de Asistencia</h3>
-        <div class="filtros" style="margin-bottom:16px">
-          <div class="filtro-campo">
+        <div class="filtros-container">
+          <div class="campo" style="margin-bottom:0">
             <label>Desde</label>
             <input type="date" id="hist-desde" />
           </div>
-          <div class="filtro-campo">
+          <div class="campo" style="margin-bottom:0">
             <label>Hasta</label>
             <input type="date" id="hist-hasta" />
           </div>
           <button class="btn-filtrar" onclick="cargarHistorial()">Buscar</button>
         </div>
-        <table class="tabla-admin">
-          <thead>
-            <tr><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th></tr>
-          </thead>
-          <tbody id="tabla-historial"></tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="tabla-admin">
+            <thead>
+              <tr><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th></tr>
+            </thead>
+            <tbody id="tabla-historial"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <!-- TAB: ADMIN REGISTROS -->
     <div id="tab-admin-registros" style="display:none">
       <div class="admin-grid" id="kpi-area">
-        <div class="kpi-card"><div class="kpi-label">Total marcajes hoy</div><div class="kpi-valor" id="kpi-hoy">—</div></div>
-        <div class="kpi-card" style="border-color:var(--verde)"><div class="kpi-label">Usuarios activos</div><div class="kpi-valor" id="kpi-usuarios">—</div></div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total marcajes hoy</div>
+          <div class="kpi-valor" id="kpi-hoy">—</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#10b981">
+          <div class="kpi-label">Usuarios activos</div>
+          <div class="kpi-valor" id="kpi-usuarios">—</div>
+        </div>
       </div>
 
       <div class="panel-card">
         <h3>Registros de Asistencia</h3>
-        <div class="filtros" style="margin-bottom:16px;gap:10px;flex-wrap:wrap">
-          <div class="filtro-campo">
+        <div class="filtros-container">
+          <div class="campo" style="margin-bottom:0">
             <label>Desde</label>
             <input type="date" id="adm-desde" />
           </div>
-          <div class="filtro-campo">
+          <div class="campo" style="margin-bottom:0">
             <label>Hasta</label>
             <input type="date" id="adm-hasta" />
           </div>
           <button class="btn-filtrar" onclick="cargarRegistrosAdmin()">Filtrar</button>
-          <a class="btn-excel" id="link-excel" href="#" target="_blank">⬇ Excel</a>
-          <a class="btn-pdf" id="link-pdf" href="#" target="_blank">⬇ PDF</a>
+          <a class="btn-export btn-excel" id="link-excel" href="#" target="_blank">📄 Excel</a>
+          <a class="btn-export btn-pdf" id="link-pdf" href="#" target="_blank">📄 PDF</a>
         </div>
-        <div style="overflow-x:auto">
+        <div class="table-responsive">
           <table class="tabla-admin">
             <thead>
               <tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th><th>Geo</th></tr>
@@ -691,13 +170,18 @@
     <!-- TAB: ADMIN USUARIOS -->
     <div id="tab-admin-usuarios" style="display:none">
       <div class="panel-card">
-        <h3>Gestión de Usuarios <button class="btn-filtrar" style="float:right;margin-top:-4px" onclick="abrirModalUsuario()">+ Nuevo</button></h3>
-        <table class="tabla-admin">
-          <thead>
-            <tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
-          </thead>
-          <tbody id="tabla-usuarios"></tbody>
-        </table>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <h3 style="margin-bottom:0">Gestión de Usuarios</h3>
+          <button class="btn-primary" style="width:auto; padding:8px 16px" onclick="abrirModalUsuario()">+ Nuevo Usuario</button>
+        </div>
+        <div class="table-responsive">
+          <table class="tabla-admin">
+            <thead>
+              <tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody id="tabla-usuarios"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -717,7 +201,7 @@
       <input type="email" id="u-email" placeholder="correo@ejemplo.cl" />
     </div>
     <div class="campo">
-      <label>Contraseña <span id="pass-hint" style="font-weight:300;color:#aaa">(dejar vacío para no cambiar)</span></label>
+      <label>Contraseña <span id="pass-hint" style="font-weight:400;color:var(--texto-suave);font-size:0.75rem">(dejar vacío para no cambiar)</span></label>
       <input type="password" id="u-password" placeholder="Mínimo 8 caracteres" />
     </div>
     <div class="campo">
@@ -736,7 +220,7 @@
     </div>
     <div class="btn-row">
       <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primary" style="width:auto;padding:9px 24px" onclick="guardarUsuario()">Guardar</button>
+      <button class="btn-primary" style="width:auto;padding:12px 24px" onclick="guardarUsuario()">Guardar Cambios</button>
     </div>
   </div>
 </div>
@@ -762,10 +246,13 @@
   function setFechaActual() {
     const ahora = new Date();
     const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-    document.getElementById('fecha-actual').textContent = ahora.toLocaleDateString('es-CL', opts) + ' — ' + ahora.toLocaleTimeString('es-CL');
-    setInterval(() => {
-      document.getElementById('fecha-actual').textContent = new Date().toLocaleDateString('es-CL', opts) + ' — ' + new Date().toLocaleTimeString('es-CL');
-    }, 1000);
+    const dateEl = document.getElementById('fecha-actual');
+    if(dateEl) {
+      dateEl.textContent = ahora.toLocaleDateString('es-CL', opts) + ' — ' + ahora.toLocaleTimeString('es-CL');
+      setInterval(() => {
+        dateEl.textContent = new Date().toLocaleDateString('es-CL', opts) + ' — ' + new Date().toLocaleTimeString('es-CL');
+      }, 1000);
+    }
   }
 
   function solicitarGeo() {
@@ -790,9 +277,10 @@
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
     const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('btn-login');
     errEl.style.display = 'none';
-    document.getElementById('btn-login').disabled = true;
-    document.getElementById('btn-login').textContent = 'Ingresando...';
+    btn.disabled = true;
+    btn.textContent = 'Ingresando...';
     try {
       const data = await api('POST', '/api/auth/login', { email, password });
       if (data.ok) {
@@ -803,8 +291,8 @@
       errEl.textContent = e.message || 'Error al iniciar sesión';
       errEl.style.display = 'block';
     } finally {
-      document.getElementById('btn-login').disabled = false;
-      document.getElementById('btn-login').textContent = 'Ingresar al sistema';
+      btn.disabled = false;
+      btn.textContent = 'Ingresar al sistema';
     }
   });
 
@@ -828,8 +316,11 @@
   function iniciarApp(user) {
     usuarioActual = user;
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
-    document.getElementById('usuario-nombre').textContent = user.nombre + (user.rol === 'admin' ? ' · Admin' : '');
+    document.getElementById('app-screen').style.display = 'flex';
+    document.getElementById('usuario-nombre').textContent = user.nombre + (user.rol === 'admin' ? ' · Administrador' : '');
+    
+    const initials = user.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    document.getElementById('usuario-avatar').textContent = initials || '👤';
 
     if (user.rol === 'admin') {
       document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
@@ -878,20 +369,19 @@
       const tbody = document.getElementById('marcajes-hoy');
       tbody.innerHTML = marcajes.length ? marcajes.map(m => `
         <tr>
-          <td><span class="badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
+          <td><span class="badge badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
           <td>${new Date(m.timestamp_servidor).toLocaleTimeString('es-CL')}</td>
-          <td style="color:var(--texto-suave);font-size:0.8rem">${m.ip_cliente || '—'}</td>
+          <td style="color:var(--texto-suave); font-family:monospace">${m.ip_cliente || '—'}</td>
         </tr>
       `).join('') : '<tr><td colspan="3" style="color:var(--texto-suave);text-align:center;padding:20px">Sin marcajes hoy</td></tr>';
 
-      // Estado jornada
       const ultimo = marcajes[marcajes.length - 1];
       const dot = document.getElementById('estado-dot');
       const texto = document.getElementById('estado-texto');
 
       if (!ultimo) {
         dot.className = 'estado-dot';
-        texto.innerHTML = 'Sin marcajes registrados hoy.';
+        texto.innerHTML = 'Sin marcajes hoy.';
       } else if (ultimo.tipo === 'entrada') {
         dot.className = 'estado-dot activo';
         texto.innerHTML = `Jornada activa desde <span class="estado-hora">${new Date(ultimo.timestamp_servidor).toLocaleTimeString('es-CL')}</span>`;
@@ -911,10 +401,10 @@
       const tbody = document.getElementById('tabla-historial');
       tbody.innerHTML = rows.length ? rows.map(m => `
         <tr>
-          <td><span class="badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
+          <td><span class="badge badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
           <td>${new Date(m.timestamp_servidor).toLocaleDateString('es-CL')}</td>
           <td>${new Date(m.timestamp_servidor).toLocaleTimeString('es-CL')}</td>
-          <td style="color:var(--texto-suave)">${m.ip_cliente || '—'}</td>
+          <td style="color:var(--texto-suave); font-family:monospace">${m.ip_cliente || '—'}</td>
         </tr>
       `).join('') : '<tr><td colspan="4" style="color:var(--texto-suave);text-align:center;padding:20px">Sin registros en el período</td></tr>';
     } catch {}
@@ -932,15 +422,14 @@
       tbody.innerHTML = rows.length ? rows.map(m => `
         <tr>
           <td><strong>${m.nombre}</strong></td>
-          <td><span class="badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
+          <td><span class="badge badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
           <td>${new Date(m.timestamp_servidor).toLocaleDateString('es-CL')}</td>
           <td>${new Date(m.timestamp_servidor).toLocaleTimeString('es-CL')}</td>
-          <td style="color:var(--texto-suave);font-size:0.82rem">${m.ip_cliente || '—'}</td>
+          <td style="color:var(--texto-suave);font-size:0.82rem;font-family:monospace">${m.ip_cliente || '—'}</td>
           <td style="color:var(--texto-suave);font-size:0.8rem">${m.latitud ? `${parseFloat(m.latitud).toFixed(4)},${parseFloat(m.longitud).toFixed(4)}` : '—'}</td>
         </tr>
       `).join('') : '<tr><td colspan="6" style="color:var(--texto-suave);text-align:center;padding:20px">Sin registros</td></tr>';
 
-      // KPIs
       const hoyStr = new Date().toLocaleDateString('es-CL');
       const marcajesHoy = rows.filter(r => new Date(r.timestamp_servidor).toLocaleDateString('es-CL') === hoyStr);
       document.getElementById('kpi-hoy').textContent = marcajesHoy.length;
@@ -959,9 +448,9 @@
         <tr>
           <td><strong>${u.nombre}</strong></td>
           <td style="color:var(--texto-suave)">${u.email}</td>
-          <td>${u.rol}</td>
-          <td>${u.activo ? '<span class="badge-entrada">Activo</span>' : '<span class="badge-salida">Inactivo</span>'}</td>
-          <td><button class="btn-filtrar" style="font-size:0.78rem;padding:5px 12px" onclick="editarUsuario(${u.id}, '${u.nombre}', '${u.email}', '${u.rol}', ${u.activo})">Editar</button></td>
+          <td><span style="font-size:0.8rem; font-weight:600; text-transform:uppercase">${u.rol}</span></td>
+          <td>${u.activo ? '<span class="badge badge-entrada">Activo</span>' : '<span class="badge badge-salida">Inactivo</span>'}</td>
+          <td><button class="btn-export" style="font-size:0.75rem;padding:4px 10px" onclick="editarUsuario(${u.id}, '${u.nombre}', '${u.email}', '${u.rol}', ${u.activo})">✏️ Editar</button></td>
         </tr>
       `).join('');
     } catch {}
@@ -1044,7 +533,6 @@
     const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  // Pre-fill date inputs
   document.addEventListener('DOMContentLoaded', () => {
     ['hist-desde','adm-desde'].forEach(id => { const el = document.getElementById(id); if(el) el.value = primerDiaMes(); });
     ['hist-hasta','adm-hasta'].forEach(id => { const el = document.getElementById(id); if(el) el.value = hoy(); });
@@ -1052,3 +540,4 @@
 </script>
 </body>
 </html>
+
