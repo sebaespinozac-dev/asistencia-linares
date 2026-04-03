@@ -3,27 +3,534 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Control de Asistencia — Delegación Provincial de Linares</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Sistema de Asistencia — Delegación Provincial de Linares</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul-institucional: #003087;
+      --rojo-institucional: #C8102E;
+      --azul-claro: #f0f4ff;
+      --gris-100: #f8fafc;
+      --gris-200: #e2e8f0;
+      --gris-300: #cbd5e1;
+      --gris-400: #94a3b8;
+      --gris-500: #64748b;
+      --gris-600: #475569;
+      --gris-700: #334155;
+      --texto: #1e293b;
+      --blanco: #ffffff;
+      --sombra: 0 10px 25px rgba(0, 0, 0, 0.05);
+      --sombra-card: 0 20px 40px rgba(0, 48, 135, 0.08);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--gris-100);
+      color: var(--texto);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Fondo institucional con blobs suaves */
+    body::before {
+      content: "";
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 70%;
+      height: 70%;
+      z-index: -1;
+      background: radial-gradient(circle, rgba(0, 48, 135, 0.12) 0%, transparent 70%);
+      filter: blur(60px);
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -10%;
+      right: -10%;
+      width: 60%;
+      height: 60%;
+      z-index: -1;
+      background: radial-gradient(circle, rgba(200, 16, 46, 0.08) 0%, transparent 70%);
+      filter: blur(60px);
+    }
+
+    /* LOGIN SCREEN */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: var(--gris-100);
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--sombra-card);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 160px;
+      height: auto;
+      margin-bottom: 32px;
+    }
+
+    .login-titulo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--texto);
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .login-subtitulo {
+      color: var(--gris-500);
+      font-size: 0.95rem;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    .campo {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gris-600);
+      margin-bottom: 8px;
+    }
+
+    .campo input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--gris-300);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background-color: var(--blanco);
+      color: var(--texto);
+    }
+
+    .campo input:focus {
+      outline: none;
+      border-color: var(--azul-institucional);
+      box-shadow: 0 0 0 4px rgba(0, 48, 135, 0.08);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--azul-institucional);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 48, 135, 0.2);
+    }
+
+    .btn-primary:hover {
+      background-color: #00256a;
+      box-shadow: 0 6px 16px rgba(0, 48, 135, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .error-msg {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 12px;
+      border-radius: var(--radius);
+      margin-top: 20px;
+      font-size: 0.875rem;
+      border: 1px solid #f5c6cb;
+      display: none;
+    }
+
+    /* TOPBAR */
+    #app-screen { display: none; }
+
+    .topbar {
+      background-color: var(--blanco);
+      border-bottom: 1px solid var(--gris-300);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .topbar-logo {
+      height: 60px;
+      width: auto;
+    }
+
+    .topbar-info h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--azul-institucional);
+      line-height: 1.2;
+    }
+
+    .topbar-info p {
+      font-size: 0.85rem;
+      color: var(--gris-600);
+      font-weight: 500;
+    }
+
+    .usuario-badge {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gris-700);
+      margin-right: 20px;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid var(--gris-400);
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gris-700);
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background-color: var(--gris-200);
+      border-color: var(--gris-600);
+    }
+
+    /* TABS */
+    .nav-tabs {
+      background: var(--blanco);
+      border-bottom: 1px solid var(--gris-300);
+      display: flex;
+      padding: 0 32px;
+      gap: 32px;
+    }
+
+    .nav-tab {
+      padding: 20px 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gris-600);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover { color: var(--azul-institucional); }
+    .nav-tab.active {
+      color: var(--azul-institucional);
+      border-bottom-color: var(--azul-institucional);
+    }
+
+    .content-area {
+      padding: 40px 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* PANELS */
+    .panel-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 40px;
+      box-shadow: var(--sombra);
+      margin-bottom: 32px;
+      border: 1px solid var(--gris-200);
+    }
+
+    .panel-card h2, .panel-card h3 {
+      color: var(--azul-institucional);
+      margin-bottom: 24px;
+      font-weight: 700;
+      font-size: 1.5rem;
+      border-bottom: 2px solid var(--azul-claro);
+      padding-bottom: 12px;
+    }
+
+    .marcaje-card {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .fecha-actual {
+      font-size: 1.1rem;
+      color: var(--gris-700);
+      margin-bottom: 32px;
+      font-weight: 600;
+    }
+
+    .estado-jornada {
+      background-color: var(--azul-claro);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .estado-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--gris-400);
+    }
+
+    .estado-dot.activo {
+      background: #198754;
+      box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.2);
+    }
+
+    .botones-marcaje {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .btn-marcar {
+      padding: 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .btn-entrada { background-color: #198754; }
+    .btn-entrada:hover { background-color: #157347; }
+
+    .btn-salida { background-color: var(--rojo-institucional); }
+    .btn-salida:hover { background-color: #a50d26; }
+
+    .btn-marcar:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .geo-info {
+      font-size: 0.85rem;
+      color: var(--gris-600);
+      margin-bottom: 32px;
+      font-weight: 500;
+      padding: 8px 16px;
+      background: var(--gris-100);
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    /* TABLES */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.95rem;
+      border: 1px solid var(--gris-300);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    th {
+      text-align: left;
+      padding: 16px;
+      background: var(--gris-100);
+      color: var(--gris-700);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--gris-300);
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid var(--gris-200);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-entrada { background: #d1e7dd; color: #0f5132; }
+    .badge-salida { background: #f8d7da; color: #842029; }
+
+    /* ADMIN */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-card {
+      background: white;
+      border: 1px solid var(--gris-200);
+      border-left: 6px solid var(--azul-institucional);
+      padding: 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--sombra);
+    }
+
+    .kpi-label { font-size: 0.8rem; color: var(--gris-600); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .kpi-valor { font-size: 2rem; font-weight: 800; color: var(--azul-institucional); }
+
+    .filtros {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      background: var(--gris-100);
+      padding: 24px;
+      border-radius: var(--radius);
+    }
+
+    .filtro-campo label { display: block; font-size: 0.8rem; margin-bottom: 8px; font-weight: 700; color: var(--gris-700); text-transform: uppercase; }
+    .filtro-campo input { padding: 10px; border: 1px solid var(--gris-300); border-radius: var(--radius); font-family: inherit; width: 180px; }
+
+    .btn-action {
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+
+    .btn-blue { background: var(--azul-institucional); color: white; }
+    .btn-blue:hover { background: #00256a; }
+
+    .btn-export { 
+      background: white; 
+      border: 1px solid var(--gris-400); 
+      text-decoration: none; 
+      color: var(--gris-700); 
+      display: inline-block; 
+    }
+    .btn-export:hover { background: var(--gris-200); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 48, 135, 0.4);
+      display: none; align-items: center; justify-content: center; z-index: 1000;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card { 
+      background: white; 
+      padding: 40px; 
+      border-radius: var(--radius); 
+      width: 100%; 
+      max-width: 500px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .toast {
+      position: fixed; bottom: 32px; left: 32px;
+      background: #333; color: white; padding: 16px 24px; border-radius: var(--radius);
+      transition: all 0.3s; z-index: 9999;
+      font-weight: 600;
+      box-shadow: var(--sombra);
+      transform: translateY(100px);
+    }
+    .toast.show { transform: translateY(0); }
+    .toast.error { background: var(--rojo-institucional); }
+
+    @media (max-width: 768px) {
+      .topbar { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .nav-tabs { padding: 0 16px; gap: 16px; overflow-x: auto; }
+      .nav-tab { white-space: nowrap; }
+      .content-area { padding: 24px 16px; }
+      .botones-marcaje { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-header">
-      <img src="logo.png" alt="Logo Delegación Presidencial" class="login-logo" />
-      <h1 class="login-titulo">Control de Asistencia</h1>
-      <p class="login-subtitulo">Delegación Presidencial Provincial de Linares</p>
-    </div>
+    <img src="logo.png" alt="Logo Gobierno" class="login-logo">
+    <h1 class="login-titulo">Control de Asistencia</h1>
+    <p class="login-subtitulo">Delegación Presidencial Provincial de Linares</p>
 
     <div class="campo">
       <label>Correo electrónico</label>
-      <input type="email" id="login-email" placeholder="usuario@ejemplo.cl" autocomplete="email" />
+      <input type="email" id="login-email" placeholder="usuario@ejemplo.cl" />
     </div>
     <div class="campo">
       <label>Contraseña</label>
-      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+      <input type="password" id="login-password" placeholder="••••••••" />
     </div>
     <button class="btn-primary" id="btn-login">Ingresar al sistema</button>
     <div class="error-msg" id="login-error"></div>
@@ -34,193 +541,125 @@
 <div id="app-screen">
   <div class="topbar">
     <div class="topbar-left">
-      <img src="logo.png" alt="Logo" class="topbar-logo" />
-      <div class="topbar-titulo-grupo">
-        <div class="topbar-titulo">Control de Asistencia</div>
-        <div class="topbar-subtitulo">Delegación Presidencial Provincial de Linares</div>
+      <img src="logo.png" alt="Logo" class="topbar-logo">
+      <div class="topbar-info">
+        <h1>Sistema de Asistencia</h1>
+        <p>Delegación Provincial de Linares</p>
       </div>
     </div>
     <div class="topbar-right">
-      <div class="usuario-info">
-        <div class="usuario-initials" id="usuario-avatar">👤</div>
-        <span class="usuario-badge" id="usuario-nombre"></span>
-      </div>
+      <span class="usuario-badge" id="usuario-nombre"></span>
       <button class="btn-logout" id="btn-logout">Cerrar sesión</button>
     </div>
   </div>
 
-  <div class="nav-container">
-    <div class="nav-tabs" id="nav-tabs">
-      <div class="nav-tab active" data-tab="marcaje">Mi Asistencia</div>
-      <div class="nav-tab" data-tab="historial">Mi Historial</div>
-      <div class="nav-tab admin-only" data-tab="admin-registros" style="display:none">Registros</div>
-      <div class="nav-tab admin-only" data-tab="admin-usuarios" style="display:none">Usuarios</div>
-    </div>
+  <div class="nav-tabs" id="nav-tabs">
+    <div class="nav-tab active" data-tab="marcaje">Mi Asistencia</div>
+    <div class="nav-tab" data-tab="historial">Mi Historial</div>
+    <div class="nav-tab admin-only" data-tab="admin-registros" style="display:none">Registros</div>
+    <div class="nav-tab admin-only" data-tab="admin-usuarios" style="display:none">Usuarios</div>
   </div>
 
   <div class="content-area">
-
-    <!-- TAB: MARCAJE -->
-    <div id="tab-marcaje">
+    <!-- TAB MARCAJE -->
+    <div id="tab-marcaje" class="tab-content">
       <div class="panel-card marcaje-card">
         <h2>Registro de Jornada</h2>
         <div class="fecha-actual" id="fecha-actual"></div>
 
         <div class="estado-jornada" id="estado-jornada">
           <div class="estado-dot" id="estado-dot"></div>
-          <div>
-            <div class="estado-texto" id="estado-texto">Cargando estado...</div>
-          </div>
+          <div class="estado-texto" id="estado-texto">Conectando...</div>
         </div>
 
         <div class="botones-marcaje">
-          <button class="btn-entrada" id="btn-entrada">
-            <span>⬆</span>
-            Marcar Entrada
+          <button class="btn-marcar btn-entrada" id="btn-entrada">
+            <span>Marcar Entrada</span>
           </button>
-          <button class="btn-salida" id="btn-salida">
-            <span>⬇</span>
-            Marcar Salida
+          <button class="btn-marcar btn-salida" id="btn-salida">
+            <span>Marcar Salida</span>
           </button>
         </div>
 
-        <div class="geo-info" id="geo-info">Obteniendo ubicación GPS...</div>
+        <div class="geo-info" id="geo-info">Obteniendo coordenadas...</div>
 
-        <h4 style="font-size:0.875rem; color:var(--texto-suave); text-transform:uppercase; letter-spacing:.05em; margin-bottom:16px; text-align:left;">Marcajes de hoy</h4>
-        <div class="table-responsive">
-          <table class="tabla-marcajes">
-            <thead>
-              <tr>
-                <th>Tipo</th>
-                <th>Hora</th>
-                <th>IP</th>
-              </tr>
-            </thead>
-            <tbody id="marcajes-hoy"></tbody>
-          </table>
-        </div>
+        <h3>Marcajes de hoy</h3>
+        <table>
+          <thead>
+            <tr><th>Tipo</th><th>Hora</th><th>IP</th></tr>
+          </thead>
+          <tbody id="marcajes-hoy"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- TAB: HISTORIAL PROPIO -->
-    <div id="tab-historial" style="display:none">
+    <!-- TAB HISTORIAL -->
+    <div id="tab-historial" class="tab-content" style="display:none">
       <div class="panel-card">
-        <h3>Mi Historial de Asistencia</h3>
-        <div class="filtros-container">
-          <div class="campo" style="margin-bottom:0">
-            <label>Desde</label>
-            <input type="date" id="hist-desde" />
-          </div>
-          <div class="campo" style="margin-bottom:0">
-            <label>Hasta</label>
-            <input type="date" id="hist-hasta" />
-          </div>
-          <button class="btn-filtrar" onclick="cargarHistorial()">Buscar</button>
+        <h3>Historial Personal</h3>
+        <div class="filtros">
+          <div class="filtro-campo"><label>Desde</label><input type="date" id="hist-desde"></div>
+          <div class="filtro-campo"><label>Hasta</label><input type="date" id="hist-hasta"></div>
+          <button class="btn-action btn-blue" onclick="cargarHistorial()">Buscar</button>
         </div>
-        <div class="table-responsive">
-          <table class="tabla-admin">
-            <thead>
-              <tr><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th></tr>
-            </thead>
-            <tbody id="tabla-historial"></tbody>
-          </table>
-        </div>
+        <table>
+          <thead><tr><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th></tr></thead>
+          <tbody id="tabla-historial"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- TAB: ADMIN REGISTROS -->
-    <div id="tab-admin-registros" style="display:none">
-      <div class="admin-grid" id="kpi-area">
-        <div class="kpi-card">
-          <div class="kpi-label">Total marcajes hoy</div>
-          <div class="kpi-valor" id="kpi-hoy">—</div>
-        </div>
-        <div class="kpi-card" style="border-left-color:#10b981">
-          <div class="kpi-label">Usuarios activos</div>
-          <div class="kpi-valor" id="kpi-usuarios">—</div>
-        </div>
+    <!-- TAB ADMIN REGISTROS -->
+    <div id="tab-admin-registros" class="tab-content" style="display:none">
+      <div class="admin-grid">
+        <div class="kpi-card"><div class="kpi-label">Marcajes Hoy</div><div class="kpi-valor" id="kpi-hoy">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">Usuarios Activos</div><div class="kpi-valor" id="kpi-usuarios">0</div></div>
       </div>
-
       <div class="panel-card">
-        <h3>Registros de Asistencia</h3>
-        <div class="filtros-container">
-          <div class="campo" style="margin-bottom:0">
-            <label>Desde</label>
-            <input type="date" id="adm-desde" />
-          </div>
-          <div class="campo" style="margin-bottom:0">
-            <label>Hasta</label>
-            <input type="date" id="adm-hasta" />
-          </div>
-          <button class="btn-filtrar" onclick="cargarRegistrosAdmin()">Filtrar</button>
-          <a class="btn-export btn-excel" id="link-excel" href="#" target="_blank">📄 Excel</a>
-          <a class="btn-export btn-pdf" id="link-pdf" href="#" target="_blank">📄 PDF</a>
+        <h3>Registros de Personal</h3>
+        <div class="filtros">
+          <div class="filtro-campo"><label>Desde</label><input type="date" id="adm-desde"></div>
+          <div class="filtro-campo"><label>Hasta</label><input type="date" id="adm-hasta"></div>
+          <button class="btn-action btn-blue" onclick="cargarRegistrosAdmin()">Filtrar</button>
+          <a href="#" target="_blank" class="btn-action btn-export" id="link-excel">Excel</a>
+          <a href="#" target="_blank" class="btn-action btn-export" id="link-pdf">PDF</a>
         </div>
-        <div class="table-responsive">
-          <table class="tabla-admin">
-            <thead>
-              <tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th><th>Geo</th></tr>
-            </thead>
-            <tbody id="tabla-admin-registros"></tbody>
-          </table>
-        </div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th></tr></thead>
+          <tbody id="tabla-admin-registros"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- TAB: ADMIN USUARIOS -->
-    <div id="tab-admin-usuarios" style="display:none">
+    <!-- TAB ADMIN USUARIOS -->
+    <div id="tab-admin-usuarios" class="tab-content" style="display:none">
       <div class="panel-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-          <h3 style="margin-bottom:0">Gestión de Usuarios</h3>
-          <button class="btn-primary" style="width:auto; padding:8px 16px" onclick="abrirModalUsuario()">+ Nuevo Usuario</button>
-        </div>
-        <div class="table-responsive">
-          <table class="tabla-admin">
-            <thead>
-              <tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
-            </thead>
-            <tbody id="tabla-usuarios"></tbody>
-          </table>
-        </div>
+        <h3>Gestión de Usuarios <button class="btn-action btn-blue" style="float:right" onclick="abrirModalUsuario()">+ Nuevo</button></h3>
+        <table>
+          <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-usuarios"></tbody>
+        </table>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- Modal Usuario -->
+<!-- MODAL USUARIO -->
 <div class="modal-overlay" id="modal-usuario">
   <div class="modal-card">
-    <h3 id="modal-titulo">Nuevo Usuario</h3>
-    <div class="campo">
-      <label>Nombre completo</label>
-      <input type="text" id="u-nombre" placeholder="Nombre Apellido" />
-    </div>
-    <div class="campo">
-      <label>Correo electrónico</label>
-      <input type="email" id="u-email" placeholder="correo@ejemplo.cl" />
-    </div>
-    <div class="campo">
-      <label>Contraseña <span id="pass-hint" style="font-weight:400;color:var(--texto-suave);font-size:0.75rem">(dejar vacío para no cambiar)</span></label>
-      <input type="password" id="u-password" placeholder="Mínimo 8 caracteres" />
-    </div>
-    <div class="campo">
-      <label>Rol</label>
-      <select id="u-rol">
+    <h3 id="modal-titulo">Usuario</h3>
+    <div class="campo"><label>Nombre</label><input type="text" id="u-nombre"></div>
+    <div class="campo"><label>Email</label><input type="email" id="u-email"></div>
+    <div class="campo"><label>Contraseña</label><input type="password" id="u-password"></div>
+    <div class="campo"><label>Rol</label>
+      <select id="u-rol" style="width:100%;padding:10px;border-radius:4px;border:1px solid var(--gris-borde)">
         <option value="empleado">Empleado</option>
         <option value="admin">Administrador</option>
       </select>
     </div>
-    <div class="campo" id="campo-activo" style="display:none">
-      <label>Estado</label>
-      <select id="u-activo">
-        <option value="true">Activo</option>
-        <option value="false">Inactivo</option>
-      </select>
-    </div>
     <div class="btn-row">
-      <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-primary" style="width:auto;padding:12px 24px" onclick="guardarUsuario()">Guardar Cambios</button>
+      <button class="btn-logout" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" style="width:auto;padding:8px 20px" onclick="guardarUsuario()">Guardar</button>
     </div>
   </div>
 </div>
@@ -228,12 +667,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ====== STATE ======
   let usuarioActual = null;
   let latitud = null, longitud = null;
   let editandoId = null;
 
-  // ====== INIT ======
   window.addEventListener('DOMContentLoaded', async () => {
     setFechaActual();
     try {
@@ -244,271 +681,20 @@
   });
 
   function setFechaActual() {
-    const ahora = new Date();
-    const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
-    const dateEl = document.getElementById('fecha-actual');
-    if(dateEl) {
-      dateEl.textContent = ahora.toLocaleDateString('es-CL', opts) + ' — ' + ahora.toLocaleTimeString('es-CL');
-      setInterval(() => {
-        dateEl.textContent = new Date().toLocaleDateString('es-CL', opts) + ' — ' + new Date().toLocaleTimeString('es-CL');
-      }, 1000);
-    }
+    const el = document.getElementById('fecha-actual');
+    const tick = () => { el.textContent = new Date().toLocaleString('es-CL'); };
+    tick(); setInterval(tick, 1000);
   }
 
   function solicitarGeo() {
-    if (!navigator.geolocation) {
-      document.getElementById('geo-info').textContent = 'Geolocalización no disponible en este dispositivo.';
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        latitud = pos.coords.latitude;
-        longitud = pos.coords.longitude;
-        document.getElementById('geo-info').textContent = `📍 Ubicación capturada: ${latitud.toFixed(5)}, ${longitud.toFixed(5)}`;
-      },
-      () => {
-        document.getElementById('geo-info').textContent = '📍 Geolocalización no disponible — se registrará por IP.';
-      }
-    );
-  }
-
-  // ====== AUTH ======
-  document.getElementById('btn-login').addEventListener('click', async () => {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    const errEl = document.getElementById('login-error');
-    const btn = document.getElementById('btn-login');
-    errEl.style.display = 'none';
-    btn.disabled = true;
-    btn.textContent = 'Ingresando...';
-    try {
-      const data = await api('POST', '/api/auth/login', { email, password });
-      if (data.ok) {
-        const me = await api('GET', '/api/auth/me');
-        iniciarApp(me);
-      }
-    } catch (e) {
-      errEl.textContent = e.message || 'Error al iniciar sesión';
-      errEl.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Ingresar al sistema';
-    }
-  });
-
-  document.getElementById('login-password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('btn-login').click();
-  });
-
-  document.getElementById('btn-logout').addEventListener('click', async () => {
-    await api('POST', '/api/auth/logout');
-    usuarioActual = null;
-    document.getElementById('app-screen').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-  });
-
-  // ====== APP ======
-  function mostrarLogin() {
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('app-screen').style.display = 'none';
-  }
-
-  function iniciarApp(user) {
-    usuarioActual = user;
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'flex';
-    document.getElementById('usuario-nombre').textContent = user.nombre + (user.rol === 'admin' ? ' · Administrador' : '');
-    
-    const initials = user.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    document.getElementById('usuario-avatar').textContent = initials || '👤';
-
-    if (user.rol === 'admin') {
-      document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
-    }
-
-    cargarMarcajesHoy();
-  }
-
-  // ====== TABS ======
-  document.querySelectorAll('.nav-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      const nombre = tab.dataset.tab;
-      document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
-      document.getElementById('tab-' + nombre).style.display = 'block';
-
-      if (nombre === 'historial') cargarHistorial();
-      if (nombre === 'admin-registros') cargarRegistrosAdmin();
-      if (nombre === 'admin-usuarios') cargarUsuariosAdmin();
-    });
-  });
-
-  // ====== MARCAJE ======
-  document.getElementById('btn-entrada').addEventListener('click', () => registrarMarcaje('entrada'));
-  document.getElementById('btn-salida').addEventListener('click', () => registrarMarcaje('salida'));
-
-  async function registrarMarcaje(tipo) {
-    document.getElementById('btn-entrada').disabled = true;
-    document.getElementById('btn-salida').disabled = true;
-    try {
-      await api('POST', '/api/marcajes', { tipo, latitud, longitud });
-      mostrarToast(`${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada correctamente`);
-      cargarMarcajesHoy();
-    } catch (e) {
-      mostrarToast(e.message || 'Error al registrar', true);
-    } finally {
-      document.getElementById('btn-entrada').disabled = false;
-      document.getElementById('btn-salida').disabled = false;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(p => {
+        latitud = p.coords.latitude; longitud = p.coords.longitude;
+        document.getElementById('geo-info').textContent = `Ubicación: ${latitud.toFixed(4)}, ${longitud.toFixed(4)}`;
+      });
     }
   }
 
-  async function cargarMarcajesHoy() {
-    try {
-      const marcajes = await api('GET', '/api/marcajes/hoy');
-      const tbody = document.getElementById('marcajes-hoy');
-      tbody.innerHTML = marcajes.length ? marcajes.map(m => `
-        <tr>
-          <td><span class="badge badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
-          <td>${new Date(m.timestamp_servidor).toLocaleTimeString('es-CL')}</td>
-          <td style="color:var(--texto-suave); font-family:monospace">${m.ip_cliente || '—'}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="3" style="color:var(--texto-suave);text-align:center;padding:20px">Sin marcajes hoy</td></tr>';
-
-      const ultimo = marcajes[marcajes.length - 1];
-      const dot = document.getElementById('estado-dot');
-      const texto = document.getElementById('estado-texto');
-
-      if (!ultimo) {
-        dot.className = 'estado-dot';
-        texto.innerHTML = 'Sin marcajes hoy.';
-      } else if (ultimo.tipo === 'entrada') {
-        dot.className = 'estado-dot activo';
-        texto.innerHTML = `Jornada activa desde <span class="estado-hora">${new Date(ultimo.timestamp_servidor).toLocaleTimeString('es-CL')}</span>`;
-      } else {
-        dot.className = 'estado-dot';
-        texto.innerHTML = `Jornada finalizada. Salida: <span class="estado-hora">${new Date(ultimo.timestamp_servidor).toLocaleTimeString('es-CL')}</span>`;
-      }
-    } catch {}
-  }
-
-  // ====== HISTORIAL PROPIO ======
-  async function cargarHistorial() {
-    const desde = document.getElementById('hist-desde').value || primerDiaMes();
-    const hasta = document.getElementById('hist-hasta').value || hoy();
-    try {
-      const rows = await api('GET', `/api/marcajes/historial?desde=${desde}&hasta=${hasta}T23:59:59`);
-      const tbody = document.getElementById('tabla-historial');
-      tbody.innerHTML = rows.length ? rows.map(m => `
-        <tr>
-          <td><span class="badge badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
-          <td>${new Date(m.timestamp_servidor).toLocaleDateString('es-CL')}</td>
-          <td>${new Date(m.timestamp_servidor).toLocaleTimeString('es-CL')}</td>
-          <td style="color:var(--texto-suave); font-family:monospace">${m.ip_cliente || '—'}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="4" style="color:var(--texto-suave);text-align:center;padding:20px">Sin registros en el período</td></tr>';
-    } catch {}
-  }
-
-  // ====== ADMIN REGISTROS ======
-  async function cargarRegistrosAdmin() {
-    const desde = document.getElementById('adm-desde').value || primerDiaMes();
-    const hasta = document.getElementById('adm-hasta').value || hoy();
-    document.getElementById('link-excel').href = `/api/admin/reporte/excel?desde=${desde}&hasta=${hasta}T23:59:59`;
-    document.getElementById('link-pdf').href = `/api/admin/reporte/pdf?desde=${desde}&hasta=${hasta}T23:59:59`;
-    try {
-      const rows = await api('GET', `/api/admin/registros?desde=${desde}&hasta=${hasta}T23:59:59`);
-      const tbody = document.getElementById('tabla-admin-registros');
-      tbody.innerHTML = rows.length ? rows.map(m => `
-        <tr>
-          <td><strong>${m.nombre}</strong></td>
-          <td><span class="badge badge-${m.tipo}">${m.tipo.toUpperCase()}</span></td>
-          <td>${new Date(m.timestamp_servidor).toLocaleDateString('es-CL')}</td>
-          <td>${new Date(m.timestamp_servidor).toLocaleTimeString('es-CL')}</td>
-          <td style="color:var(--texto-suave);font-size:0.82rem;font-family:monospace">${m.ip_cliente || '—'}</td>
-          <td style="color:var(--texto-suave);font-size:0.8rem">${m.latitud ? `${parseFloat(m.latitud).toFixed(4)},${parseFloat(m.longitud).toFixed(4)}` : '—'}</td>
-        </tr>
-      `).join('') : '<tr><td colspan="6" style="color:var(--texto-suave);text-align:center;padding:20px">Sin registros</td></tr>';
-
-      const hoyStr = new Date().toLocaleDateString('es-CL');
-      const marcajesHoy = rows.filter(r => new Date(r.timestamp_servidor).toLocaleDateString('es-CL') === hoyStr);
-      document.getElementById('kpi-hoy').textContent = marcajesHoy.length;
-
-      const usuarios = await api('GET', '/api/admin/usuarios');
-      document.getElementById('kpi-usuarios').textContent = usuarios.filter(u => u.activo).length;
-    } catch {}
-  }
-
-  // ====== ADMIN USUARIOS ======
-  async function cargarUsuariosAdmin() {
-    try {
-      const usuarios = await api('GET', '/api/admin/usuarios');
-      const tbody = document.getElementById('tabla-usuarios');
-      tbody.innerHTML = usuarios.map(u => `
-        <tr>
-          <td><strong>${u.nombre}</strong></td>
-          <td style="color:var(--texto-suave)">${u.email}</td>
-          <td><span style="font-size:0.8rem; font-weight:600; text-transform:uppercase">${u.rol}</span></td>
-          <td>${u.activo ? '<span class="badge badge-entrada">Activo</span>' : '<span class="badge badge-salida">Inactivo</span>'}</td>
-          <td><button class="btn-export" style="font-size:0.75rem;padding:4px 10px" onclick="editarUsuario(${u.id}, '${u.nombre}', '${u.email}', '${u.rol}', ${u.activo})">✏️ Editar</button></td>
-        </tr>
-      `).join('');
-    } catch {}
-  }
-
-  function abrirModalUsuario() {
-    editandoId = null;
-    document.getElementById('modal-titulo').textContent = 'Nuevo Usuario';
-    document.getElementById('u-nombre').value = '';
-    document.getElementById('u-email').value = '';
-    document.getElementById('u-password').value = '';
-    document.getElementById('u-rol').value = 'empleado';
-    document.getElementById('pass-hint').style.display = 'none';
-    document.getElementById('campo-activo').style.display = 'none';
-    document.getElementById('modal-usuario').classList.add('active');
-  }
-
-  function editarUsuario(id, nombre, email, rol, activo) {
-    editandoId = id;
-    document.getElementById('modal-titulo').textContent = 'Editar Usuario';
-    document.getElementById('u-nombre').value = nombre;
-    document.getElementById('u-email').value = email;
-    document.getElementById('u-password').value = '';
-    document.getElementById('u-rol').value = rol;
-    document.getElementById('u-activo').value = activo;
-    document.getElementById('pass-hint').style.display = 'inline';
-    document.getElementById('campo-activo').style.display = 'block';
-    document.getElementById('modal-usuario').classList.add('active');
-  }
-
-  function cerrarModal() {
-    document.getElementById('modal-usuario').classList.remove('active');
-  }
-
-  async function guardarUsuario() {
-    const body = {
-      nombre: document.getElementById('u-nombre').value,
-      email: document.getElementById('u-email').value,
-      password: document.getElementById('u-password').value,
-      rol: document.getElementById('u-rol').value,
-      activo: document.getElementById('u-activo').value === 'true'
-    };
-    try {
-      if (editandoId) {
-        await api('PATCH', `/api/admin/usuarios/${editandoId}`, body);
-        mostrarToast('Usuario actualizado');
-      } else {
-        await api('POST', '/api/admin/usuarios', body);
-        mostrarToast('Usuario creado');
-      }
-      cerrarModal();
-      cargarUsuariosAdmin();
-    } catch (e) {
-      mostrarToast(e.message || 'Error al guardar', true);
-    }
-  }
-
-  // ====== UTILS ======
   async function api(method, url, body) {
     const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
@@ -518,26 +704,125 @@
     return data;
   }
 
-  function mostrarToast(msg, error = false) {
+  document.getElementById('btn-login').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const err = document.getElementById('login-error');
+    err.style.display = 'none';
+    try {
+      await api('POST', '/api/auth/login', { email, password });
+      const user = await api('GET', '/api/auth/me');
+      iniciarApp(user);
+    } catch (e) {
+      err.textContent = e.message; err.style.display = 'block';
+    }
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await api('POST', '/api/auth/logout');
+    location.reload();
+  });
+
+  function iniciarApp(user) {
+    usuarioActual = user;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    document.getElementById('usuario-nombre').textContent = user.nombre;
+    if (user.rol === 'admin') document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'block');
+    cargarMarcajesHoy();
+  }
+
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+      const target = 'tab-' + tab.dataset.tab;
+      document.getElementById(target).style.display = 'block';
+      if (tab.dataset.tab === 'historial') cargarHistorial();
+      if (tab.dataset.tab === 'admin-registros') cargarRegistrosAdmin();
+      if (tab.dataset.tab === 'admin-usuarios') cargarUsuariosAdmin();
+    });
+  });
+
+  document.getElementById('btn-entrada').addEventListener('click', () => registrar('entrada'));
+  document.getElementById('btn-salida').addEventListener('click', () => registrar('salida'));
+
+  async function registrar(tipo) {
+    try {
+      await api('POST', '/api/marcajes', { tipo, latitud, longitud });
+      mostrarToast('Registro exitoso');
+      cargarMarcajesHoy();
+    } catch (e) { mostrarToast(e.message, true); }
+  }
+
+  async function cargarMarcajesHoy() {
+    try {
+      const data = await api('GET', '/api/marcajes/hoy');
+      const tbody = document.getElementById('marcajes-hoy');
+      tbody.innerHTML = data.map(m => `
+        <tr><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${new Date(m.timestamp_servidor).toLocaleTimeString()}</td><td>${m.ip_cliente || '-'}</td></tr>
+      `).join('') || '<tr><td colspan="3">No hay registros hoy</td></tr>';
+
+      const ultimo = data[data.length - 1];
+      const dot = document.getElementById('estado-dot');
+      const txt = document.getElementById('estado-texto');
+      if (ultimo?.tipo === 'entrada') {
+        dot.className = 'estado-dot activo';
+        txt.innerHTML = `Activo desde <b>${new Date(ultimo.timestamp_servidor).toLocaleTimeString()}</b>`;
+      } else {
+        dot.className = 'estado-dot'; txt.textContent = 'Jornada inactiva';
+      }
+    } catch {}
+  }
+
+  async function cargarHistorial() {
+    const d = document.getElementById('hist-desde').value;
+    const h = document.getElementById('hist-hasta').value;
+    try {
+      const data = await api('GET', `/api/marcajes/historial?desde=${d}&hasta=${h}`);
+      document.getElementById('tabla-historial').innerHTML = data.map(m => `
+        <tr><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${new Date(m.timestamp_servidor).toLocaleDateString()}</td><td>${new Date(m.timestamp_servidor).toLocaleTimeString()}</td><td>${m.ip_cliente || '-'}</td></tr>
+      `).join('');
+    } catch {}
+  }
+
+  async function cargarRegistrosAdmin() {
+    const d = document.getElementById('adm-desde').value;
+    const h = document.getElementById('adm-hasta').value;
+    document.getElementById('link-excel').href = `/api/admin/reporte/excel?desde=${d}&hasta=${h}`;
+    document.getElementById('link-pdf').href = `/api/admin/reporte/pdf?desde=${d}&hasta=${h}`;
+    try {
+      const data = await api('GET', `/api/admin/registros?desde=${d}&hasta=${h}`);
+      document.getElementById('tabla-admin-registros').innerHTML = data.map(m => `
+        <tr><td>${m.nombre}</td><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${new Date(m.timestamp_servidor).toLocaleDateString()}</td><td>${new Date(m.timestamp_servidor).toLocaleTimeString()}</td><td>${m.ip_cliente || '-'}</td></tr>
+      `).join('');
+      document.getElementById('kpi-hoy').textContent = data.filter(m => new Date(m.timestamp_servidor).toDateString() === new Date().toDateString()).length;
+    } catch {}
+  }
+
+  async function cargarUsuariosAdmin() {
+    try {
+      const data = await api('GET', '/api/admin/usuarios');
+      document.getElementById('tabla-usuarios').innerHTML = data.map(u => `
+        <tr><td>${u.nombre}</td><td>${u.email}</td><td>${u.rol}</td><td>${u.activo ? 'Si' : 'No'}</td><td><button onclick="editarUser(${u.id})">Editar</button></td></tr>
+      `).join('');
+      document.getElementById('kpi-usuarios').textContent = data.length;
+    } catch {}
+  }
+
+  function mostrarToast(msg, err) {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast' + (error ? ' error' : '');
-    t.classList.add('show');
+    t.textContent = msg; t.className = 'toast' + (err ? ' error' : '') + ' show';
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  function primerDiaMes() {
-    const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+  function abrirModalUsuario() { editandoId = null; document.getElementById('modal-usuario').classList.add('active'); }
+  function cerrarModal() { document.getElementById('modal-usuario').classList.remove('active'); }
+  async function guardarUsuario() {
+    const body = { nombre: document.getElementById('u-nombre').value, email: document.getElementById('u-email').value, password: document.getElementById('u-password').value, rol: document.getElementById('u-rol').value };
+    try { await api('POST', '/api/admin/usuarios', body); cerrarModal(); cargarUsuariosAdmin(); } catch (e) { mostrarToast(e.message, true); }
   }
-  function hoy() {
-    const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    ['hist-desde','adm-desde'].forEach(id => { const el = document.getElementById(id); if(el) el.value = primerDiaMes(); });
-    ['hist-hasta','adm-hasta'].forEach(id => { const el = document.getElementById(id); if(el) el.value = hoy(); });
-  });
 </script>
 </body>
 </html>
-
