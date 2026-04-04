@@ -37,35 +37,42 @@
 
     body {
       font-family: var(--font-family);
-      background-color: var(--gris-100);
+      background: linear-gradient(135deg,
+        #001a52 0%,
+        #003087 35%,
+        #00256a 55%,
+        #6b0016 78%,
+        #C8102E 100%
+      );
       color: var(--texto);
       line-height: 1.6;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* Fondo institucional con blobs suaves */
+    /* Luz suave arriba izquierda */
     body::before {
       content: "";
       position: fixed;
-      top: -10%;
+      top: -15%;
       left: -10%;
-      width: 70%;
-      height: 70%;
-      z-index: -1;
-      background: radial-gradient(circle, rgba(0, 48, 135, 0.12) 0%, transparent 70%);
-      filter: blur(60px);
+      width: 55%;
+      height: 75%;
+      z-index: 0;
+      background: radial-gradient(ellipse, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
+    /* Brillo rojo abajo derecha */
     body::after {
       content: "";
       position: fixed;
-      bottom: -10%;
+      bottom: -15%;
       right: -10%;
-      width: 60%;
-      height: 60%;
-      z-index: -1;
-      background: radial-gradient(circle, rgba(200, 16, 46, 0.08) 0%, transparent 70%);
-      filter: blur(60px);
+      width: 55%;
+      height: 70%;
+      z-index: 0;
+      background: radial-gradient(ellipse, rgba(200, 16, 46, 0.18) 0%, transparent 65%);
+      pointer-events: none;
     }
 
     /* LOGIN SCREEN */
@@ -75,19 +82,30 @@
       align-items: center;
       justify-content: center;
       padding: 40px 20px;
-      background: var(--gris-100);
+      position: relative;
+      z-index: 1;
     }
 
     .login-card {
       background: rgba(255, 255, 255, 0.97);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px);
       border-radius: var(--radius);
-      padding: 48px 40px;
+      padding: 52px 44px 48px;
       width: 100%;
       max-width: 420px;
-      box-shadow: var(--sombra-card);
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.12);
       text-align: center;
+      position: relative;
+    }
+
+    /* Línea superior con gradiente del logo */
+    .login-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      background: linear-gradient(90deg, #003087 0%, #C8102E 100%);
     }
 
     .login-logo {
@@ -145,7 +163,7 @@
     .btn-primary {
       width: 100%;
       padding: 14px;
-      background-color: var(--azul-institucional);
+      background: linear-gradient(135deg, #003087 0%, #001f5e 55%, #8b0015 100%);
       color: white;
       border: none;
       border-radius: var(--radius-sm);
@@ -153,13 +171,12 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0, 48, 135, 0.2);
+      box-shadow: 0 4px 18px rgba(0, 48, 135, 0.38);
     }
 
     .btn-primary:hover {
-      background-color: #00256a;
-      box-shadow: 0 6px 16px rgba(0, 48, 135, 0.3);
       transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(0, 48, 135, 0.48);
     }
 
     .btn-primary:active {
