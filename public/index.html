@@ -26,6 +26,7 @@
       --radius: 12px;
       --radius-sm: 8px;
       --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      --gris-borde: #cbd5e1;
     }
 
     * {
@@ -817,11 +818,39 @@
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
-  function abrirModalUsuario() { editandoId = null; document.getElementById('modal-usuario').classList.add('active'); }
+  function mostrarLogin() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+  }
+
+  function abrirModalUsuario() { editandoId = null; document.getElementById('modal-titulo').textContent = 'Nuevo Usuario'; document.getElementById('u-nombre').value = ''; document.getElementById('u-email').value = ''; document.getElementById('u-password').value = ''; document.getElementById('u-rol').value = 'empleado'; document.getElementById('modal-usuario').classList.add('active'); }
   function cerrarModal() { document.getElementById('modal-usuario').classList.remove('active'); }
+
+  async function editarUser(id) {
+    try {
+      const data = await api('GET', '/api/admin/usuarios');
+      const user = data.find(u => u.id === id);
+      if (!user) return;
+      editandoId = id;
+      document.getElementById('modal-titulo').textContent = 'Editar Usuario';
+      document.getElementById('u-nombre').value = user.nombre;
+      document.getElementById('u-email').value = user.email;
+      document.getElementById('u-password').value = '';
+      document.getElementById('u-rol').value = user.rol;
+      document.getElementById('modal-usuario').classList.add('active');
+    } catch (e) { mostrarToast(e.message, true); }
+  }
+
   async function guardarUsuario() {
     const body = { nombre: document.getElementById('u-nombre').value, email: document.getElementById('u-email').value, password: document.getElementById('u-password').value, rol: document.getElementById('u-rol').value };
-    try { await api('POST', '/api/admin/usuarios', body); cerrarModal(); cargarUsuariosAdmin(); } catch (e) { mostrarToast(e.message, true); }
+    try {
+      if (editandoId) {
+        await api('PATCH', `/api/admin/usuarios/${editandoId}`, body);
+      } else {
+        await api('POST', '/api/admin/usuarios', body);
+      }
+      cerrarModal(); cargarUsuariosAdmin(); mostrarToast('Usuario guardado correctamente');
+    } catch (e) { mostrarToast(e.message, true); }
   }
 </script>
 </body>

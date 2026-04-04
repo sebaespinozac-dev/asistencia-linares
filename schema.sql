@@ -31,6 +31,6 @@ INSERT INTO usuarios (nombre, email, password_hash, rol)
 VALUES (
   'Administrador',
   'admin@delegacion-linares.cl',
-  '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQyCgK8gMKNFiNpNPmHzX2Xre',
+  '$2a$12$jB7CvjzBbHZgKe54fOFazuTuaJvblQMkvUz.1hV0.NfctxAd/3/dG',
   'admin'
 ) ON CONFLICT (email) DO NOTHING;
