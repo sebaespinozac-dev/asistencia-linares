@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preview — Control de Asistencia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg,
+        #001a52 0%,
+        #003087 35%,
+        #00256a 55%,
+        #6b0016 78%,
+        #C8102E 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Luz suave arriba izquierda */
+    body::before {
+      content: "";
+      position: fixed;
+      top: -15%; left: -10%;
+      width: 55%; height: 75%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Brillo rojo abajo derecha */
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -15%; right: -10%;
+      width: 55%; height: 70%;
+      background: radial-gradient(ellipse, rgba(200,16,46,0.18) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(24px);
+      border-radius: 18px;
+      padding: 52px 44px 48px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255,255,255,0.12);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Barra superior con gradiente del logo */
+    .login-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      border-radius: 18px 18px 0 0;
+      background: linear-gradient(90deg, #003087 0%, #C8102E 100%);
+    }
+
+    .login-logo {
+      width: 160px;
+      height: auto;
+      margin-bottom: 30px;
+    }
+
+    .login-titulo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 6px;
+      letter-spacing: -0.4px;
+    }
+
+    .login-subtitulo {
+      color: #64748b;
+      font-size: 0.88rem;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+
+    .campo { margin-bottom: 18px; text-align: left; }
+
+    .campo label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .campo input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.97rem;
+      font-family: inherit;
+      background: #f8faff;
+      color: #1e293b;
+      transition: all 0.2s;
+    }
+
+    .campo input:focus {
+      outline: none;
+      border-color: #003087;
+      box-shadow: 0 0 0 3px rgba(0,48,135,0.1);
+      background: white;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #003087 0%, #001f5e 55%, #8b0015 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.97rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 18px rgba(0,48,135,0.38);
+      transition: all 0.2s;
+      margin-top: 6px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(0,48,135,0.48);
+    }
+
+    /* Badge preview */
+    .badge-preview {
+      position: fixed;
+      top: 16px; right: 16px;
+      background: rgba(255,255,255,0.13);
+      color: rgba(255,255,255,0.9);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body>
+  <span class="badge-preview">👁 Solo Preview</span>
+
+  <div class="login-card">
+    <img src="logo.png" alt="Logo Gobierno" class="login-logo">
+
+    <h1 class="login-titulo">Control de Asistencia</h1>
+    <p class="login-subtitulo">Delegación Presidencial Provincial de Linares</p>
+
+    <div class="campo">
+      <label>Correo electrónico</label>
+      <input type="email" placeholder="usuario@ejemplo.cl" />
+    </div>
+    <div class="campo">
+      <label>Contraseña</label>
+      <input type="password" placeholder="••••••••" />
+    </div>
+    <button class="btn-primary">Ingresar al sistema</button>
+  </div>
+</body>
+</html>

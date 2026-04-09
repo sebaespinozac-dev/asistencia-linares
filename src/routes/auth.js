@@ -22,7 +22,7 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
     const token = jwt.sign(
-      { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol },
+      { id: user.id, nombre: user.nombre, email: user.email, rol: user.rol, organizacion: user.organizacion },
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );

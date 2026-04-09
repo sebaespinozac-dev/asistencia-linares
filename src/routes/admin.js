@@ -12,7 +12,8 @@ router.use(authMiddleware, adminOnly);
 router.get('/usuarios', async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT id, nombre, email, rol, activo, creado_en FROM usuarios ORDER BY nombre'
+      'SELECT id, nombre, email, rol, activo, creado_en FROM usuarios WHERE organizacion = $1 ORDER BY nombre',
+      [req.user.organizacion]
     );
     res.json(rows);
   } catch (err) {
@@ -28,10 +29,10 @@ router.post('/usuarios', async (req, res) => {
   try {
     const hash = await bcrypt.hash(password, 12);
     const { rows } = await pool.query(
-      `INSERT INTO usuarios (nombre, email, password_hash, rol)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO usuarios (nombre, email, password_hash, rol, organizacion)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, nombre, email, rol, activo, creado_en`,
-      [nombre, email.toLowerCase().trim(), hash, rol || 'empleado']
+      [nombre, email.toLowerCase().trim(), hash, rol || 'empleado', req.user.organizacion]
     );
     res.json({ ok: true, usuario: rows[0] });
   } catch (err) {
@@ -74,8 +75,9 @@ router.get('/registros', async (req, res) => {
       FROM marcajes m
       JOIN usuarios u ON m.usuario_id = u.id
       WHERE m.timestamp_servidor BETWEEN $1 AND $2
+      AND u.organizacion = $3
     `;
-    const params = [desde, hasta];
+    const params = [desde, hasta, req.user.organizacion];
 
     if (usuario_id) {
       query += ` AND m.usuario_id = $${params.length + 1}`;
@@ -102,8 +104,9 @@ router.get('/reporte/excel', async (req, res) => {
       FROM marcajes m
       JOIN usuarios u ON m.usuario_id = u.id
       WHERE m.timestamp_servidor BETWEEN $1 AND $2
+      AND u.organizacion = $3
       ORDER BY u.nombre, m.timestamp_servidor ASC
-    `, [desde, hasta]);
+    `, [desde, hasta, req.user.organizacion]);
 
     // Agrupar por usuario y día
     const resumen = {};
@@ -180,8 +183,9 @@ router.get('/reporte/pdf', async (req, res) => {
       FROM marcajes m
       JOIN usuarios u ON m.usuario_id = u.id
       WHERE m.timestamp_servidor BETWEEN $1 AND $2
+      AND u.organizacion = $3
       ORDER BY u.nombre, m.timestamp_servidor ASC
-    `, [desde, hasta]);
+    `, [desde, hasta, req.user.organizacion]);
 
     const resumen = {};
     for (const row of rows) {
