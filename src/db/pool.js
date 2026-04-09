@@ -43,7 +43,7 @@ async function initialize() {
     database: url.pathname.slice(1),
     user: decodeURIComponent(url.username),
     password: decodeURIComponent(url.password),
-    ssl: { rejectUnauthorized: false },
+    ssl: { rejectUnauthorized: false, servername: url.hostname },
     connectionTimeoutMillis: 5000,
   });
 
