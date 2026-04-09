@@ -1,10 +1,6 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
-const dns = require('dns');
-const { promisify } = require('util');
 require('dotenv').config();
-
-const resolve4 = promisify(dns.resolve4);
 
 let initPromise = null;
 let pool = null;
@@ -32,18 +28,9 @@ async function initialize() {
     throw new Error('❌ DATABASE_URL no está configurado. Configure la variable de entorno antes de iniciar.');
   }
 
-  const url = new URL(dbUrl);
-  const ipv4Addresses = await resolve4(url.hostname);
-  const ipv4Host = ipv4Addresses[0];
-  console.log(`🔍 Resolviendo ${url.hostname} → ${ipv4Host}`);
-
   const realPool = new Pool({
-    host: ipv4Host,
-    port: parseInt(url.port) || 5432,
-    database: url.pathname.slice(1),
-    user: decodeURIComponent(url.username),
-    password: decodeURIComponent(url.password),
-    ssl: { rejectUnauthorized: false, servername: url.hostname },
+    connectionString: dbUrl,
+    ssl: dbUrl.includes('render.com') || dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
     connectionTimeoutMillis: 5000,
   });
 
