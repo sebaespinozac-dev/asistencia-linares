@@ -30,8 +30,9 @@ async function initialize() {
 
   const realPool = new Pool({
     connectionString: dbUrl,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false },
     connectionTimeoutMillis: 5000,
+    family: 4,
   });
 
   await realPool.query('SELECT 1');
