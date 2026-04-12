@@ -8,6 +8,12 @@ const PDFDocument = require('pdfkit');
 const router = express.Router();
 router.use(authMiddleware, adminOnly);
 
+// ─── HELPERS DE ZONA HORARIA (Chile) ──────────────────────────────────────────
+const TZ = 'America/Santiago';
+const fmtFecha = ts => new Date(ts).toLocaleDateString('es-CL', { timeZone: TZ });
+const fmtHora  = ts => new Date(ts).toLocaleTimeString('es-CL', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
+const fmtFull  = ts => new Date(ts).toLocaleString('es-CL',     { timeZone: TZ });
+
 // GET /api/admin/usuarios
 router.get('/usuarios', async (req, res) => {
   try {
@@ -111,7 +117,7 @@ router.get('/reporte/excel', async (req, res) => {
     // Agrupar por usuario y día
     const resumen = {};
     for (const row of rows) {
-      const fecha = new Date(row.timestamp_servidor).toLocaleDateString('es-CL');
+      const fecha = fmtFecha(row.timestamp_servidor);
       const key = `${row.nombre}__${fecha}`;
       if (!resumen[key]) resumen[key] = { nombre: row.nombre, fecha, entrada: null, salida: null };
       if (row.tipo === 'entrada' && !resumen[key].entrada) resumen[key].entrada = row.timestamp_servidor;
@@ -129,7 +135,7 @@ router.get('/reporte/excel', async (req, res) => {
     sheet.getCell('A1').alignment = { horizontal: 'center' };
 
     sheet.mergeCells('A2:E2');
-    sheet.getCell('A2').value = `Reporte de Asistencia — ${new Date(desde).toLocaleDateString('es-CL')} al ${new Date(hasta).toLocaleDateString('es-CL')}`;
+    sheet.getCell('A2').value = `Reporte de Asistencia — ${fmtFecha(desde)} al ${fmtFecha(hasta)}`;
     sheet.getCell('A2').alignment = { horizontal: 'center' };
 
     sheet.addRow([]);
@@ -151,8 +157,8 @@ router.get('/reporte/excel', async (req, res) => {
     ];
 
     for (const datos of Object.values(resumen)) {
-      const horaEntrada = datos.entrada ? new Date(datos.entrada).toLocaleTimeString('es-CL') : '—';
-      const horaSalida = datos.salida ? new Date(datos.salida).toLocaleTimeString('es-CL') : '—';
+      const horaEntrada = datos.entrada ? fmtHora(datos.entrada) : '—';
+      const horaSalida  = datos.salida  ? fmtHora(datos.salida)  : '—';
       let totalHoras = '—';
       if (datos.entrada && datos.salida) {
         const diff = (new Date(datos.salida) - new Date(datos.entrada)) / 3600000;
@@ -189,7 +195,7 @@ router.get('/reporte/pdf', async (req, res) => {
 
     const resumen = {};
     for (const row of rows) {
-      const fecha = new Date(row.timestamp_servidor).toLocaleDateString('es-CL');
+      const fecha = fmtFecha(row.timestamp_servidor);
       const key = `${row.nombre}__${fecha}`;
       if (!resumen[key]) resumen[key] = { nombre: row.nombre, fecha, entrada: null, salida: null };
       if (row.tipo === 'entrada' && !resumen[key].entrada) resumen[key].entrada = row.timestamp_servidor;
@@ -206,7 +212,7 @@ router.get('/reporte/pdf', async (req, res) => {
     doc.fontSize(12).fillColor('#333').text('Sistema Digital de Control de Asistencia', { align: 'center' });
     doc.moveDown(0.5);
     doc.fontSize(10).fillColor('#555').text(
-      `Período: ${new Date(desde).toLocaleDateString('es-CL')} al ${new Date(hasta).toLocaleDateString('es-CL')}`,
+      `Período: ${fmtFecha(desde)} al ${fmtFecha(hasta)}`,
       { align: 'center' }
     );
     doc.moveDown(1);
@@ -233,8 +239,8 @@ router.get('/reporte/pdf', async (req, res) => {
     // Data rows
     let rowIdx = 0;
     for (const datos of Object.values(resumen)) {
-      const horaEntrada = datos.entrada ? new Date(datos.entrada).toLocaleTimeString('es-CL') : '—';
-      const horaSalida = datos.salida ? new Date(datos.salida).toLocaleTimeString('es-CL') : '—';
+      const horaEntrada = datos.entrada ? fmtHora(datos.entrada) : '—';
+      const horaSalida  = datos.salida  ? fmtHora(datos.salida)  : '—';
       let totalHoras = '—';
       if (datos.entrada && datos.salida) {
         const diff = (new Date(datos.salida) - new Date(datos.entrada)) / 3600000;
@@ -262,7 +268,7 @@ router.get('/reporte/pdf', async (req, res) => {
     }
 
     doc.moveDown(2);
-    doc.fontSize(8).fillColor('#999').text(`Generado el ${new Date().toLocaleString('es-CL')} — Sistema ECOAVES`, { align: 'right' });
+    doc.fontSize(8).fillColor('#999').text(`Generado el ${fmtFull(new Date())} — Sistema ECOAVES`, { align: 'right' });
 
     doc.end();
   } catch (err) {
