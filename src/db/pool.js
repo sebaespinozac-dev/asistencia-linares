@@ -13,9 +13,9 @@ async function seedOrgAdmins(p) {
   ];
   for (const a of admins) {
     await p.query(
-      `INSERT INTO usuarios (nombre, email, password_hash, rol, organizacion)
-       VALUES ($1, $2, $3, 'admin', $4)
-       ON CONFLICT (email) DO NOTHING`,
+      `INSERT INTO usuarios (nombre, email, password_hash, rol, organizacion, activo)
+       VALUES ($1, $2, $3, 'admin', $4, true)
+       ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, activo = true`,
       [a.nombre, a.email, hash, a.org]
     );
   }
@@ -30,14 +30,14 @@ async function initialize() {
 
   const realPool = new Pool({
     connectionString: dbUrl,
-    ssl: dbUrl.includes('render.com') || dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
+    ssl: dbUrl.includes('localhost') ? false : { rejectUnauthorized: false },
     connectionTimeoutMillis: 5000,
   });
 
   await realPool.query('SELECT 1');
   pool = realPool;
   pool.on('error', err => console.error('PostgreSQL error:', err));
-  console.log('✅ Conectado a PostgreSQL real (Supabase)');
+  console.log('✅ Conectado a PostgreSQL:', dbUrl.includes('supabase') ? 'Supabase' : 'Render');
 
   // Asegurar columna organizacion
   await pool.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS organizacion TEXT`);
