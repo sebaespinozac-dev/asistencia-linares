@@ -698,6 +698,15 @@
     solicitarGeo();
   });
 
+  // Parsear timestamps del servidor (vienen sin Z = UTC naive) forzando UTC
+  function parseUTC(ts) {
+    if (!ts) return new Date();
+    const s = String(ts);
+    return new Date(s.includes('Z') || s.includes('+') ? s : s.replace(' ', 'T') + 'Z');
+  }
+  const fmtHora = ts => parseUTC(ts).toLocaleTimeString('es-CL');
+  const fmtFecha = ts => parseUTC(ts).toLocaleDateString('es-CL');
+
   function setFechaActual() {
     const el = document.getElementById('fecha-actual');
     const tick = () => { el.textContent = new Date().toLocaleString('es-CL'); };
@@ -779,7 +788,7 @@
       const data = await api('GET', '/api/marcajes/hoy');
       const tbody = document.getElementById('marcajes-hoy');
       tbody.innerHTML = data.map(m => `
-        <tr><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${new Date(m.timestamp_servidor).toLocaleTimeString()}</td><td>${m.ip_cliente || '-'}</td></tr>
+        <tr><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${fmtHora(m.timestamp_servidor)}</td><td>${m.ip_cliente || '-'}</td></tr>
       `).join('') || '<tr><td colspan="3">No hay registros hoy</td></tr>';
 
       const ultimo = data[data.length - 1];
@@ -787,7 +796,7 @@
       const txt = document.getElementById('estado-texto');
       if (ultimo?.tipo === 'entrada') {
         dot.className = 'estado-dot activo';
-        txt.innerHTML = `Activo desde <b>${new Date(ultimo.timestamp_servidor).toLocaleTimeString()}</b>`;
+        txt.innerHTML = `Activo desde <b>${fmtHora(ultimo.timestamp_servidor)}</b>`;
       } else {
         dot.className = 'estado-dot'; txt.textContent = 'Jornada inactiva';
       }
@@ -800,7 +809,7 @@
     try {
       const data = await api('GET', `/api/marcajes/historial?desde=${d}&hasta=${h}`);
       document.getElementById('tabla-historial').innerHTML = data.map(m => `
-        <tr><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${new Date(m.timestamp_servidor).toLocaleDateString()}</td><td>${new Date(m.timestamp_servidor).toLocaleTimeString()}</td><td>${m.ip_cliente || '-'}</td></tr>
+        <tr><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${fmtFecha(m.timestamp_servidor)}</td><td>${fmtHora(m.timestamp_servidor)}</td><td>${m.ip_cliente || '-'}</td></tr>
       `).join('');
     } catch {}
   }
@@ -813,9 +822,9 @@
     try {
       const data = await api('GET', `/api/admin/registros?desde=${d}&hasta=${h}`);
       document.getElementById('tabla-admin-registros').innerHTML = data.map(m => `
-        <tr><td>${m.nombre}</td><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${new Date(m.timestamp_servidor).toLocaleDateString()}</td><td>${new Date(m.timestamp_servidor).toLocaleTimeString()}</td><td>${m.ip_cliente || '-'}</td></tr>
+        <tr><td>${m.nombre}</td><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${fmtFecha(m.timestamp_servidor)}</td><td>${fmtHora(m.timestamp_servidor)}</td><td>${m.ip_cliente || '-'}</td></tr>
       `).join('');
-      document.getElementById('kpi-hoy').textContent = data.filter(m => new Date(m.timestamp_servidor).toDateString() === new Date().toDateString()).length;
+      document.getElementById('kpi-hoy').textContent = data.filter(m => fmtFecha(m.timestamp_servidor) === fmtFecha(new Date())).length;
     } catch {}
   }
 
