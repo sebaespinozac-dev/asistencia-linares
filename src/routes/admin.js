@@ -9,10 +9,25 @@ const router = express.Router();
 router.use(authMiddleware, adminOnly);
 
 // ─── HELPERS DE ZONA HORARIA (Chile) ──────────────────────────────────────────
-const TZ = 'America/Santiago';
-const fmtFecha = ts => new Date(ts).toLocaleDateString('es-CL', { timeZone: TZ });
-const fmtHora  = ts => new Date(ts).toLocaleTimeString('es-CL', { timeZone: TZ, hour: '2-digit', minute: '2-digit' });
-const fmtFull  = ts => new Date(ts).toLocaleString('es-CL',     { timeZone: TZ });
+// Offset manual: UTC-4 en invierno (abr-sep), UTC-3 en verano (oct-mar)
+const pad = n => String(n).padStart(2, '0');
+function toChile(ts) {
+  const d = new Date(ts);
+  const mes = d.getUTCMonth() + 1;
+  const offsetHrs = (mes >= 4 && mes <= 9) ? -4 : -3;
+  return new Date(d.getTime() + offsetHrs * 3600000);
+}
+const fmtFecha = ts => {
+  const d = toChile(ts);
+  return `${pad(d.getUTCDate())}-${pad(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`;
+};
+const fmtHora = ts => {
+  const d = toChile(ts);
+  const h = d.getUTCHours(), m = d.getUTCMinutes(), s = d.getUTCSeconds();
+  const ampm = h >= 12 ? 'p. m.' : 'a. m.';
+  return `${h % 12 || 12}:${pad(m)}:${pad(s)} ${ampm}`;
+};
+const fmtFull = ts => `${fmtFecha(ts)}, ${fmtHora(ts)}`;
 
 // GET /api/admin/usuarios
 router.get('/usuarios', async (req, res) => {
