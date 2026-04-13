@@ -698,14 +698,28 @@
     solicitarGeo();
   });
 
-  // Parsear timestamps del servidor (vienen sin Z = UTC naive) forzando UTC
+  // Conversión manual a hora Chile (UTC-4 abr-sep, UTC-3 oct-mar)
+  const pad2 = n => String(n).padStart(2, '0');
   function parseUTC(ts) {
     if (!ts) return new Date();
     const s = String(ts);
     return new Date(s.includes('Z') || s.includes('+') ? s : s.replace(' ', 'T') + 'Z');
   }
-  const fmtHora = ts => parseUTC(ts).toLocaleTimeString('es-CL');
-  const fmtFecha = ts => parseUTC(ts).toLocaleDateString('es-CL');
+  function toChile(ts) {
+    const d = parseUTC(ts);
+    const mes = d.getUTCMonth() + 1;
+    const off = (mes >= 4 && mes <= 9) ? -4 : -3;
+    return new Date(d.getTime() + off * 3600000);
+  }
+  const fmtHora = ts => {
+    const d = toChile(ts);
+    const h = d.getUTCHours(), m = d.getUTCMinutes(), s = d.getUTCSeconds();
+    return `${h % 12 || 12}:${pad2(m)}:${pad2(s)} ${h >= 12 ? 'p. m.' : 'a. m.'}`;
+  };
+  const fmtFecha = ts => {
+    const d = toChile(ts);
+    return `${pad2(d.getUTCDate())}-${pad2(d.getUTCMonth()+1)}-${d.getUTCFullYear()}`;
+  };
 
   function setFechaActual() {
     const el = document.getElementById('fecha-actual');
