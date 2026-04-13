@@ -1,3 +1,4 @@
+process.env.TZ = 'America/Santiago'; // Forzar timezone Chile antes de cualquier import
 require('dotenv').config();
 const express = require('express');
 const cookieParser = require('cookie-parser');
