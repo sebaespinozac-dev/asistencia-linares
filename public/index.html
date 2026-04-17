@@ -675,6 +675,11 @@
         <option value="admin">Administrador</option>
       </select>
     </div>
+    <div class="campo" id="campo-activo" style="display:none">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="u-activo"> Usuario activo
+      </label>
+    </div>
     <div class="btn-row">
       <button class="btn-logout" onclick="cerrarModal()">Cancelar</button>
       <button class="btn-primary" style="width:auto;padding:8px 20px" onclick="guardarUsuario()">Guardar</button>
@@ -846,7 +851,7 @@
     try {
       const data = await api('GET', '/api/admin/usuarios');
       document.getElementById('tabla-usuarios').innerHTML = data.map(u => `
-        <tr><td>${u.nombre}</td><td>${u.email}</td><td>${u.rol}</td><td>${u.activo ? 'Si' : 'No'}</td><td><button onclick="editarUser(${u.id})">Editar</button></td></tr>
+        <tr><td>${u.nombre}</td><td>${u.email}</td><td>${u.rol}</td><td>${u.activo ? 'Si' : 'No'}</td><td style="display:flex;gap:6px"><button onclick="editarUser(${u.id})">Editar</button><button onclick="eliminarUser(${u.id},'${u.nombre}')" style="background:#c0392b;color:white;border:none;padding:4px 10px;border-radius:4px;cursor:pointer">Eliminar</button></td></tr>
       `).join('');
       document.getElementById('kpi-usuarios').textContent = data.length;
     } catch {}
@@ -863,7 +868,7 @@
     document.getElementById('app-screen').style.display = 'none';
   }
 
-  function abrirModalUsuario() { editandoId = null; document.getElementById('modal-titulo').textContent = 'Nuevo Usuario'; document.getElementById('u-nombre').value = ''; document.getElementById('u-email').value = ''; document.getElementById('u-password').value = ''; document.getElementById('u-rol').value = 'empleado'; document.getElementById('modal-usuario').classList.add('active'); }
+  function abrirModalUsuario() { editandoId = null; document.getElementById('modal-titulo').textContent = 'Nuevo Usuario'; document.getElementById('u-nombre').value = ''; document.getElementById('u-email').value = ''; document.getElementById('u-password').value = ''; document.getElementById('u-rol').value = 'empleado'; document.getElementById('campo-activo').style.display = 'none'; document.getElementById('modal-usuario').classList.add('active'); }
   function cerrarModal() { document.getElementById('modal-usuario').classList.remove('active'); }
 
   async function editarUser(id) {
@@ -877,12 +882,14 @@
       document.getElementById('u-email').value = user.email;
       document.getElementById('u-password').value = '';
       document.getElementById('u-rol').value = user.rol;
+      document.getElementById('u-activo').checked = user.activo;
+      document.getElementById('campo-activo').style.display = 'block';
       document.getElementById('modal-usuario').classList.add('active');
     } catch (e) { mostrarToast(e.message, true); }
   }
 
   async function guardarUsuario() {
-    const body = { nombre: document.getElementById('u-nombre').value, email: document.getElementById('u-email').value, password: document.getElementById('u-password').value, rol: document.getElementById('u-rol').value };
+    const body = { nombre: document.getElementById('u-nombre').value, email: document.getElementById('u-email').value, password: document.getElementById('u-password').value, rol: document.getElementById('u-rol').value, activo: editandoId ? document.getElementById('u-activo').checked : true };
     try {
       if (editandoId) {
         await api('PATCH', `/api/admin/usuarios/${editandoId}`, body);
@@ -890,6 +897,14 @@
         await api('POST', '/api/admin/usuarios', body);
       }
       cerrarModal(); cargarUsuariosAdmin(); mostrarToast('Usuario guardado correctamente');
+    } catch (e) { mostrarToast(e.message, true); }
+  }
+
+  async function eliminarUser(id, nombre) {
+    if (!confirm(`¿Eliminar a ${nombre}? Se borrarán todos sus registros de asistencia.`)) return;
+    try {
+      await api('DELETE', `/api/admin/usuarios/${id}`);
+      cargarUsuariosAdmin(); mostrarToast('Usuario eliminado');
     } catch (e) { mostrarToast(e.message, true); }
   }
 </script>

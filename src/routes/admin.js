@@ -84,6 +84,23 @@ router.patch('/usuarios/:id', async (req, res) => {
   }
 });
 
+// DELETE /api/admin/usuarios/:id
+router.delete('/usuarios/:id', async (req, res) => {
+  const { id } = req.params;
+  if (parseInt(id) === req.user.id) return res.status(400).json({ error: 'No puedes eliminarte a ti mismo' });
+  try {
+    await pool.query('DELETE FROM marcajes WHERE usuario_id = $1', [id]);
+    const { rowCount } = await pool.query(
+      'DELETE FROM usuarios WHERE id = $1 AND organizacion = $2',
+      [id, req.user.organizacion]
+    );
+    if (rowCount === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al eliminar usuario' });
+  }
+});
+
 // GET /api/admin/registros - todos los marcajes con filtros
 router.get('/registros', async (req, res) => {
   const desde = req.query.desde || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
