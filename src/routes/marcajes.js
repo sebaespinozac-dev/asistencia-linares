@@ -19,14 +19,17 @@ router.post('/', authMiddleware, async (req, res) => {
     'desconocida';
 
   try {
-    // Buscar el último marcaje del usuario sin restringir a hoy,
-    // para soportar turnos que cruzan medianoche (ej: entrada 20:00, salida 08:00 día siguiente).
+    // Buscar el último marcaje dentro de las últimas 18h para soportar turnos noche
+    // (entrada 20:00 → salida 08:00 = 12h), sin bloquear si olvidaron marcar salida días atrás.
+    const ventana = new Date(Date.now() - 18 * 3600 * 1000);
+
     const { rows: ultimos } = await pool.query(
       `SELECT tipo FROM marcajes
        WHERE usuario_id = $1
+         AND timestamp_servidor >= $2
        ORDER BY timestamp_servidor DESC
        LIMIT 1`,
-      [req.user.id]
+      [req.user.id, ventana]
     );
 
     const ultimoTipo = ultimos[0]?.tipo;
@@ -35,7 +38,7 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Ya tienes una entrada abierta. Registra tu salida primero.' });
     }
     if (tipo === 'salida' && ultimoTipo !== 'entrada') {
-      return res.status(400).json({ error: 'No tienes una entrada abierta.' });
+      return res.status(400).json({ error: 'No tienes una entrada abierta en las últimas 18 horas.' });
     }
 
     const { rows } = await pool.query(
