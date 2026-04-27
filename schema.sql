@@ -26,6 +26,18 @@ CREATE TABLE IF NOT EXISTS marcajes (
 CREATE INDEX IF NOT EXISTS idx_marcajes_usuario ON marcajes(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_marcajes_timestamp ON marcajes(timestamp_servidor);
 
+CREATE TABLE IF NOT EXISTS justificaciones (
+  id              SERIAL PRIMARY KEY,
+  funcionaria_id  INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  fecha           DATE NOT NULL,
+  motivo          TEXT NOT NULL,
+  creado_por      INTEGER REFERENCES usuarios(id),
+  created_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_just_funcionaria ON justificaciones(funcionaria_id);
+CREATE INDEX IF NOT EXISTS idx_just_fecha ON justificaciones(fecha);
+
 -- Admin inicial (contraseña: Admin2024! - CAMBIAR INMEDIATAMENTE)
 INSERT INTO usuarios (nombre, email, password_hash, rol)
 VALUES (

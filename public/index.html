@@ -524,6 +524,9 @@
     .toast.show { transform: translateY(0); }
     .toast.error { background: var(--rojo-institucional); }
 
+    .badge-justificado { background: #fff3cd; color: #664d03; border: 1px solid #ffc107; }
+    .row-justificado td { background: #fffdf5 !important; }
+
     @media (max-width: 768px) {
       .topbar { flex-direction: column; gap: 16px; align-items: flex-start; }
       .nav-tabs { padding: 0 16px; gap: 16px; overflow-x: auto; }
@@ -576,6 +579,7 @@
     <div class="nav-tab" data-tab="historial">Mi Historial</div>
     <div class="nav-tab admin-only" data-tab="admin-registros" style="display:none">Registros</div>
     <div class="nav-tab admin-only" data-tab="admin-usuarios" style="display:none">Usuarios</div>
+    <div class="nav-tab admin-only" data-tab="admin-justificaciones" style="display:none">Justificaciones</div>
   </div>
 
   <div class="content-area">
@@ -621,7 +625,7 @@
           <button class="btn-action btn-blue" onclick="cargarHistorial()">Buscar</button>
         </div>
         <table>
-          <thead><tr><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th></tr></thead>
+          <thead><tr><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th><th>Observación</th></tr></thead>
           <tbody id="tabla-historial"></tbody>
         </table>
       </div>
@@ -643,7 +647,7 @@
           <a href="#" target="_blank" class="btn-action btn-export" id="link-pdf">PDF</a>
         </div>
         <table>
-          <thead><tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th></tr></thead>
+          <thead><tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>IP</th><th>Observación</th></tr></thead>
           <tbody id="tabla-admin-registros"></tbody>
         </table>
       </div>
@@ -656,6 +660,46 @@
         <table>
           <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="tabla-usuarios"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB ADMIN JUSTIFICACIONES -->
+    <div id="tab-admin-justificaciones" class="tab-content" style="display:none">
+      <div class="panel-card">
+        <h3>Nueva Justificación de Marcaje</h3>
+        <div class="filtros" style="flex-wrap:wrap">
+          <div class="filtro-campo">
+            <label>Funcionaria</label>
+            <select id="just-funcionaria" style="padding:10px;border-radius:8px;border:1px solid var(--gris-borde);font-family:inherit;min-width:200px;font-size:0.9rem"></select>
+          </div>
+          <div class="filtro-campo">
+            <label>Fecha</label>
+            <input type="date" id="just-fecha">
+          </div>
+          <div class="filtro-campo" style="flex:1;min-width:260px">
+            <label>Motivo / Observación</label>
+            <input type="text" id="just-motivo" placeholder="Ej: No pudo marcar por corte de luz" style="width:100%;padding:10px;border:1px solid var(--gris-borde);border-radius:8px;font-family:inherit;font-size:0.9rem">
+          </div>
+          <button class="btn-action btn-blue" onclick="guardarJustificacion()">Guardar justificación</button>
+        </div>
+      </div>
+      <div class="panel-card">
+        <h3>Historial de Justificaciones</h3>
+        <div class="filtros">
+          <div class="filtro-campo">
+            <label>Funcionaria</label>
+            <select id="just-filtro-funcionaria" style="padding:10px;border-radius:8px;border:1px solid var(--gris-borde);font-family:inherit;min-width:200px;font-size:0.9rem">
+              <option value="">— Todas —</option>
+            </select>
+          </div>
+          <div class="filtro-campo"><label>Desde</label><input type="date" id="just-desde"></div>
+          <div class="filtro-campo"><label>Hasta</label><input type="date" id="just-hasta"></div>
+          <button class="btn-action btn-blue" onclick="cargarJustificaciones()">Buscar</button>
+        </div>
+        <table>
+          <thead><tr><th>Funcionaria</th><th>Fecha</th><th>Motivo</th><th>Registrado por</th><th>Fecha registro</th></tr></thead>
+          <tbody id="tabla-justificaciones"></tbody>
         </table>
       </div>
     </div>
@@ -788,6 +832,7 @@
       if (tab.dataset.tab === 'historial') cargarHistorial();
       if (tab.dataset.tab === 'admin-registros') cargarRegistrosAdmin();
       if (tab.dataset.tab === 'admin-usuarios') cargarUsuariosAdmin();
+      if (tab.dataset.tab === 'admin-justificaciones') cargarJustificacionesTab();
     });
   });
 
@@ -825,11 +870,35 @@
   async function cargarHistorial() {
     const d = document.getElementById('hist-desde').value;
     const h = document.getElementById('hist-hasta').value;
+    const qd = d ? `&desde=${d}` : '';
+    const qh = h ? `&hasta=${h}` : '';
     try {
-      const data = await api('GET', `/api/marcajes/historial?desde=${d}&hasta=${h}`);
-      document.getElementById('tabla-historial').innerHTML = data.map(m => `
-        <tr><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${fmtFecha(m.timestamp_servidor)}</td><td>${fmtHora(m.timestamp_servidor)}</td><td>${m.ip_cliente || '-'}</td></tr>
-      `).join('');
+      const [marcajes, justificaciones] = await Promise.all([
+        api('GET', `/api/marcajes/historial?desde=${d}&hasta=${h}`),
+        api('GET', `/api/justificaciones/${usuarioActual.id}?_=1${qd}${qh}`)
+      ]);
+      const rows = [
+        ...marcajes.map(m => ({
+          esJust: false, tipo: m.tipo,
+          fecha: m.timestamp_servidor,
+          hora: fmtHora(m.timestamp_servidor),
+          ip: m.ip_cliente || '-', obs: ''
+        })),
+        ...justificaciones.map(j => ({
+          esJust: true, tipo: 'justificado',
+          fecha: j.fecha + 'T12:00:00Z',
+          hora: '—', ip: '—', obs: j.motivo
+        }))
+      ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      document.getElementById('tabla-historial').innerHTML = rows.map(r => `
+        <tr${r.esJust ? ' class="row-justificado"' : ''}>
+          <td><span class="badge badge-${r.tipo}">${r.tipo}</span></td>
+          <td>${fmtFecha(r.fecha)}</td>
+          <td>${r.hora}</td>
+          <td>${r.ip}</td>
+          <td style="font-size:0.85rem;color:var(--gris-700)">${r.obs || '—'}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="5">Sin registros</td></tr>';
     } catch {}
   }
 
@@ -838,12 +907,37 @@
     const h = document.getElementById('adm-hasta').value;
     document.getElementById('link-excel').href = `/api/admin/reporte/excel?desde=${d}&hasta=${h}`;
     document.getElementById('link-pdf').href = `/api/admin/reporte/pdf?desde=${d}&hasta=${h}`;
+    const qd = d ? `&desde=${d}` : '';
+    const qh = h ? `&hasta=${h}` : '';
     try {
-      const data = await api('GET', `/api/admin/registros?desde=${d}&hasta=${h}`);
-      document.getElementById('tabla-admin-registros').innerHTML = data.map(m => `
-        <tr><td>${m.nombre}</td><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td><td>${fmtFecha(m.timestamp_servidor)}</td><td>${fmtHora(m.timestamp_servidor)}</td><td>${m.ip_cliente || '-'}</td></tr>
+      const [marcajes, justificaciones] = await Promise.all([
+        api('GET', `/api/admin/registros?desde=${d}&hasta=${h}`),
+        api('GET', `/api/justificaciones?_=1${qd}${qh}`)
+      ]);
+      const rows = [
+        ...marcajes.map(m => ({
+          esJust: false, nombre: m.nombre, tipo: m.tipo,
+          fecha: m.timestamp_servidor,
+          hora: fmtHora(m.timestamp_servidor),
+          ip: m.ip_cliente || '-', obs: ''
+        })),
+        ...justificaciones.map(j => ({
+          esJust: true, nombre: j.funcionaria_nombre, tipo: 'justificado',
+          fecha: j.fecha + 'T12:00:00Z',
+          hora: '—', ip: '—', obs: j.motivo
+        }))
+      ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      document.getElementById('tabla-admin-registros').innerHTML = rows.map(r => `
+        <tr${r.esJust ? ' class="row-justificado"' : ''}>
+          <td>${r.nombre}</td>
+          <td><span class="badge badge-${r.tipo}">${r.tipo}</span></td>
+          <td>${fmtFecha(r.fecha)}</td>
+          <td>${r.hora}</td>
+          <td>${r.ip}</td>
+          <td style="font-size:0.85rem;color:var(--gris-700)">${r.obs || '—'}</td>
+        </tr>
       `).join('');
-      document.getElementById('kpi-hoy').textContent = data.filter(m => fmtFecha(m.timestamp_servidor) === fmtFecha(new Date())).length;
+      document.getElementById('kpi-hoy').textContent = rows.filter(r => !r.esJust && fmtFecha(r.fecha) === fmtFecha(new Date())).length;
     } catch {}
   }
 
@@ -898,6 +992,57 @@
       }
       cerrarModal(); cargarUsuariosAdmin(); mostrarToast('Usuario guardado correctamente');
     } catch (e) { mostrarToast(e.message, true); }
+  }
+
+  async function cargarJustificacionesTab() {
+    try {
+      const usuarios = await api('GET', '/api/admin/usuarios');
+      const opts = usuarios.filter(u => u.activo).map(u =>
+        `<option value="${u.id}">${u.nombre}</option>`
+      ).join('');
+      document.getElementById('just-funcionaria').innerHTML = opts;
+      document.getElementById('just-filtro-funcionaria').innerHTML =
+        '<option value="">— Todas —</option>' + opts;
+    } catch {}
+    cargarJustificaciones();
+  }
+
+  async function guardarJustificacion() {
+    const funcionaria_id = document.getElementById('just-funcionaria').value;
+    const fecha = document.getElementById('just-fecha').value;
+    const motivo = document.getElementById('just-motivo').value.trim();
+    if (!funcionaria_id || !fecha || !motivo) {
+      mostrarToast('Completa todos los campos', true); return;
+    }
+    try {
+      await api('POST', '/api/justificaciones', { funcionaria_id: parseInt(funcionaria_id), fecha, motivo });
+      mostrarToast('Justificación guardada correctamente');
+      document.getElementById('just-fecha').value = '';
+      document.getElementById('just-motivo').value = '';
+      cargarJustificaciones();
+    } catch (e) { mostrarToast(e.message, true); }
+  }
+
+  async function cargarJustificaciones() {
+    const fid   = document.getElementById('just-filtro-funcionaria').value;
+    const desde = document.getElementById('just-desde').value;
+    const hasta = document.getElementById('just-hasta').value;
+    let url = '/api/justificaciones?_=1';
+    if (fid)   url += `&funcionaria_id=${fid}`;
+    if (desde) url += `&desde=${desde}`;
+    if (hasta) url += `&hasta=${hasta}`;
+    try {
+      const data = await api('GET', url);
+      document.getElementById('tabla-justificaciones').innerHTML = data.map(j => `
+        <tr class="row-justificado">
+          <td>${j.funcionaria_nombre}</td>
+          <td>${j.fecha}</td>
+          <td><span class="badge badge-justificado">✓ Justificado</span> ${j.motivo}</td>
+          <td style="font-size:0.85rem;color:var(--gris-600)">${j.admin_nombre || 'Admin'}</td>
+          <td style="font-size:0.85rem;color:var(--gris-600)">${fmtFecha(j.created_at)}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--gris-500);padding:24px">Sin justificaciones registradas</td></tr>';
+    } catch {}
   }
 
   async function eliminarUser(id, nombre) {
