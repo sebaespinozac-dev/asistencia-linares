@@ -11,6 +11,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Health check
+app.get('/health', (req, res) => res.json({ ok: true }));
+
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/marcajes', require('./routes/marcajes'));
